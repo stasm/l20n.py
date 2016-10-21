@@ -1,2 +1,2 @@
 test:
-	 PYTHONPATH=../.. python -m unittest test_properties
+	 PYTHONPATH=../.. python -m unittest test_operations
