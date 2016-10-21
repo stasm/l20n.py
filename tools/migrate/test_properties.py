@@ -4,7 +4,7 @@ from compare_locales.parser import PropertiesParser
 from l20n.format.serializer import FTLSerializer
 import l20n.format.ast as FTL
 
-from operations import Copy
+from operations import Copy, Replace
 
 
 # Mock Source using the collection parsed in setUp.
@@ -93,6 +93,110 @@ class TestCopyOperation(unittest.TestCase):
         self.assertEqual(
             self.serialize(msg),
             'foo-html-entity = &lt;&#x21E7;&#x2318;K&gt;\n'
+        )
+
+
+class TestReplaceOperation(unittest.TestCase):
+    def setUp(self):
+        ftl_serializer = FTLSerializer()
+        self.serialize = lambda node: ftl_serializer.dumpEntry(node.toJSON())
+
+        # Parse properties into the internal Context.
+        self.prop_parser = PropertiesParser()
+        self.prop_parser.readContents('''
+            hello = Hello, #1!
+            welcome = Welcome, #1, to #2!
+            first = #1 Bar
+            last = Foo #1
+        ''')
+        # Transform the parsed result which is an iterator into a dict.
+        self.props = {ent.get_key(): ent for ent in self.prop_parser}
+
+    def test_replace_one(self):
+        msg = FTL.Entity(
+            FTL.Identifier('hello'),
+            value=Replace(
+                Source(self.props, 'hello'),
+                {'#1': [FTL.ExternalArgument('username')]}
+            )
+        )
+
+        self.assertEqual(
+            self.serialize(msg),
+            'hello = Hello, { $username }!\n'
+        )
+
+    def test_replace_two(self):
+        msg = FTL.Entity(
+            FTL.Identifier('welcome'),
+            value=Replace(
+                Source(self.props, 'welcome'),
+                {'#1': [FTL.ExternalArgument('username')],
+                 '#2': [FTL.ExternalArgument('appname')]}
+            )
+        )
+
+        self.assertEqual(
+            self.serialize(msg),
+            'welcome = Welcome, { $username }, to { $appname }!\n'
+        )
+
+    def test_replace_too_many(self):
+        msg = FTL.Entity(
+            FTL.Identifier('welcome'),
+            value=Replace(
+                Source(self.props, 'welcome'),
+                {'#1': [FTL.ExternalArgument('username')],
+                 '#2': [FTL.ExternalArgument('appname')],
+                 '#3': [FTL.ExternalArgument('extraname')]}
+            )
+        )
+
+        self.assertEqual(
+            self.serialize(msg),
+            'welcome = Welcome, { $username }, to { $appname }!\n'
+        )
+
+    def test_replace_too_few(self):
+        msg = FTL.Entity(
+            FTL.Identifier('welcome'),
+            value=Replace(
+                Source(self.props, 'welcome'),
+                {'#1': [FTL.ExternalArgument('username')]}
+            )
+        )
+
+        self.assertEqual(
+            self.serialize(msg),
+            'welcome = Welcome, { $username }, to #2!\n'
+        )
+
+    def test_replace_first(self):
+        msg = FTL.Entity(
+            FTL.Identifier('first'),
+            value=Replace(
+                Source(self.props, 'first'),
+                {'#1': [FTL.ExternalArgument('foo')]}
+            )
+        )
+
+        self.assertEqual(
+            self.serialize(msg),
+            'first = { $foo } Bar\n'
+        )
+
+    def test_replace_last(self):
+        msg = FTL.Entity(
+            FTL.Identifier('last'),
+            value=Replace(
+                Source(self.props, 'last'),
+                {'#1': [FTL.ExternalArgument('bar')]}
+            )
+        )
+
+        self.assertEqual(
+            self.serialize(msg),
+            'last = Foo { $bar }\n'
         )
 
 
