@@ -58,10 +58,11 @@ class Section(Node):
 
 
 class Pattern(Node):
-    def __init__(self, source, elements):
+    def __init__(self, source, elements, quoteDelim=False):
         super(Pattern, self).__init__()
         self.source = source
         self.elements = elements
+        self._quoteDelim = quoteDelim
 
 
 class Member(Node):

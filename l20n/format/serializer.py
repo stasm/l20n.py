@@ -64,8 +64,6 @@ class FTLSerializer():
     def dumpPattern(self, pattern):
         if pattern is None:
             return u''
-        if pattern['_quoteDelim']:
-            return u'"{}"'.format(pattern['source'])
         str = u''
 
         for elem in pattern['elements']:
@@ -77,6 +75,9 @@ class FTLSerializer():
                     str += elem['value']
             elif elem['type'] == 'Placeable':
                 str += self.dumpPlaceable(elem)
+
+        if pattern['_quoteDelim']:
+            return u'"{}"'.format(str)
         return str
 
     def dumpPlaceable(self, placeable):
