@@ -1,3 +1,5 @@
+# coding=utf8
+
 import unittest
 import textwrap
 
@@ -414,6 +416,60 @@ class TestConcatInterpolate(unittest.TestCase):
             ftl('''
                 channel-desc = "You are on the { $channelname } channel. "
             ''')
+        )
+
+
+class TestConcatReplace(unittest.TestCase):
+    def setUp(self):
+        self.strings = parse(DTDParser, '''
+            <!ENTITY community.start       "&brandShortName; is designed by ">
+            <!ENTITY community.mozillaLink "&vendorShortName;">
+            <!ENTITY community.middle      ", a ">
+            <!ENTITY community.creditsLink "global community">
+            <!ENTITY community.end         " working together to…">
+        ''')
+
+    def test_concat_replace(self):
+        msg = FTL.Entity(
+            FTL.Identifier('community'),
+            value=CONCAT(
+                REPLACE(
+                    SOURCE(self.strings, 'community.start'),
+                    {
+                        '&brandShortName;': [
+                            FTL.ExternalArgument('brand-short-name')
+                        ]
+                    }
+                ),
+                COPY('<a>'),
+                REPLACE(
+                    SOURCE(self.strings, 'community.mozillaLink'),
+                    {
+                        '&vendorShortName;': [
+                            FTL.ExternalArgument('vendor-short-name')
+                        ]
+                    }
+                ),
+                COPY('</a>'),
+                COPY(
+                    SOURCE(self.strings, 'community.middle')
+                ),
+                COPY('<a>'),
+                COPY(
+                    SOURCE(self.strings, 'community.creditsLink')
+                ),
+                COPY('</a>'),
+                COPY(
+                    SOURCE(self.strings, 'community.end')
+                )
+            )
+        )
+
+        self.assertEqual(
+            serialize(msg),
+            (u'community = { $brand-short-name } is designed by '
+             u'<a>{ $vendor-short-name }</a>, a <a>global community</a> '
+             u'working together to…\n')
         )
 
 
