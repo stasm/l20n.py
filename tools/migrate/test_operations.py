@@ -13,9 +13,26 @@ from operations import COPY, INTERPOLATE, REPLACE, PLURAL, CONCAT
 ftl_serializer = FTLSerializer()
 
 
-def ftl(string):
-    """Nicer indentation for FTL code."""
-    return textwrap.dedent(string[1:])
+def ftl(code):
+    """Nicer indentation for FTL code.
+
+    The code returned by this function is meant to be compared against the
+    output of the FTL Serializer.  The input code will be UTF8-decoded and will
+    end with a newline to match the output of the serializer.
+    """
+
+    # The FTL Serializer returns Unicode data.
+    code = code.decode('utf8')
+
+    # The code might be triple-quoted.
+    code = textwrap.dedent(code.lstrip('\n'))
+
+    # The FTL Serializer always appends EOL to serialized entries. The FTL code
+    # that we want to compare against the serializer's output should too.
+    if not code.endswith('\n'):
+        code += '\n'
+
+    return code
 
 
 def serialize(node):
@@ -56,7 +73,9 @@ class TestCopy(unittest.TestCase):
 
         self.assertEqual(
             serialize(msg),
-            'foo = Foo\n'
+            ftl('''
+                foo = Foo
+            ''')
         )
 
     def test_copy_escape_unicode_middle(self):
@@ -69,7 +88,9 @@ class TestCopy(unittest.TestCase):
 
         self.assertEqual(
             serialize(msg),
-            'foo-unicode-middle = Foo Bar\n'
+            ftl('''
+                foo-unicode-middle = Foo Bar
+            ''')
         )
 
     def test_copy_escape_unicode_begin(self):
@@ -82,7 +103,9 @@ class TestCopy(unittest.TestCase):
 
         self.assertEqual(
             serialize(msg),
-            'foo-unicode-begin = " Foo"\n'
+            ftl('''
+                foo-unicode-begin = " Foo"
+            ''')
         )
 
     def test_copy_escape_unicode_end(self):
@@ -95,7 +118,9 @@ class TestCopy(unittest.TestCase):
 
         self.assertEqual(
             serialize(msg),
-            'foo-unicode-end = "Foo "\n'
+            ftl('''
+                foo-unicode-end = "Foo "
+            ''')
         )
 
     def test_copy_html_entity(self):
@@ -108,7 +133,9 @@ class TestCopy(unittest.TestCase):
 
         self.assertEqual(
             serialize(msg),
-            'foo-html-entity = &lt;&#x21E7;&#x2318;K&gt;\n'
+            ftl('''
+                foo-html-entity = &lt;&#x21E7;&#x2318;K&gt;
+            ''')
         )
 
 
@@ -132,7 +159,9 @@ class TestReplace(unittest.TestCase):
 
         self.assertEqual(
             serialize(msg),
-            'hello = Hello, { $username }!\n'
+            ftl('''
+                hello = Hello, { $username }!
+            ''')
         )
 
     def test_replace_two(self):
@@ -147,7 +176,9 @@ class TestReplace(unittest.TestCase):
 
         self.assertEqual(
             serialize(msg),
-            'welcome = Welcome, { $username }, to { $appname }!\n'
+            ftl('''
+                welcome = Welcome, { $username }, to { $appname }!
+            ''')
         )
 
     def test_replace_too_many(self):
@@ -163,7 +194,9 @@ class TestReplace(unittest.TestCase):
 
         self.assertEqual(
             serialize(msg),
-            'welcome = Welcome, { $username }, to { $appname }!\n'
+            ftl('''
+                welcome = Welcome, { $username }, to { $appname }!
+            ''')
         )
 
     def test_replace_too_few(self):
@@ -177,7 +210,9 @@ class TestReplace(unittest.TestCase):
 
         self.assertEqual(
             serialize(msg),
-            'welcome = Welcome, { $username }, to #2!\n'
+            ftl('''
+                welcome = Welcome, { $username }, to #2!
+            ''')
         )
 
     def test_replace_first(self):
@@ -191,7 +226,9 @@ class TestReplace(unittest.TestCase):
 
         self.assertEqual(
             serialize(msg),
-            'first = { $foo } Bar\n'
+            ftl('''
+                first = { $foo } Bar
+            ''')
         )
 
     def test_replace_last(self):
@@ -205,7 +242,9 @@ class TestReplace(unittest.TestCase):
 
         self.assertEqual(
             serialize(msg),
-            'last = Foo { $bar }\n'
+            ftl('''
+                last = Foo { $bar }
+            ''')
         )
 
 
@@ -467,9 +506,9 @@ class TestConcatReplace(unittest.TestCase):
 
         self.assertEqual(
             serialize(msg),
-            (u'community = { $brand-short-name } is designed by '
-             u'<a>{ $vendor-short-name }</a>, a <a>global community</a> '
-             u'working together to…\n')
+            ftl('community = { $brand-short-name } is designed by '
+                '<a>{ $vendor-short-name }</a>, a <a>global community</a> '
+                'working together to…')
         )
 
 
