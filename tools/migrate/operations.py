@@ -59,8 +59,9 @@ def REPLACE(source, repls):
         text_before = FTL.TextElement(before)
         placeable = FTL.Placeable(repls[sep])
         text_after = FTL.TextElement(after)
-        # Return the elements found and converted so far, and the remaining text
-        # which hasn't been scanned for placeables yet.
+
+        # Return the elements found and converted so far, and the remaining
+        # text which hasn't been scanned for placeables yet.
         return parts + [text_before, placeable], text_after
 
     # Start with an empty list of elements and the original translation. It's

@@ -264,7 +264,7 @@ class TestPluralReplace(unittest.TestCase):
         )
 
 
-class TestConcat(unittest.TestCase):
+class TestConcatCopy(unittest.TestCase):
     def setUp(self):
         self.props = parse('''
             hello = Hello, world!
@@ -350,6 +350,40 @@ class TestConcat(unittest.TestCase):
             serialize(msg),
             ftl('''
                 hello = "Hello, world! "
+            ''')
+        )
+
+
+class TestConcatLiteral(unittest.TestCase):
+    def setUp(self):
+        self.props = parse('''
+            update.failed.start    = Update failed.\\u0020
+            update.failed.linkText = Download manually
+            update.failed.end      = !
+        ''')
+
+    def test_concat_literal(self):
+        msg = FTL.Entity(
+            FTL.Identifier('update-failed'),
+            value=CONCAT(
+                COPY(
+                    SOURCE(self.props, 'update.failed.start'),
+                ),
+                COPY('<a>'),
+                COPY(
+                    SOURCE(self.props, 'update.failed.linkText'),
+                ),
+                COPY('</a>'),
+                COPY(
+                    SOURCE(self.props, 'update.failed.end'),
+                ),
+            )
+        )
+
+        self.assertEqual(
+            serialize(msg),
+            ftl('''
+                update-failed = Update failed. <a>Download manually</a>!
             ''')
         )
 
