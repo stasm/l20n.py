@@ -5,7 +5,7 @@ from compare_locales.parser import PropertiesParser
 from l20n.format.serializer import FTLSerializer
 import l20n.format.ast as FTL
 
-from operations import Copy, Replace, Plural
+from operations import COPY, REPLACE, PLURAL
 
 
 ftl_serializer = FTLSerializer()
@@ -28,8 +28,8 @@ def parse(string):
     return {ent.get_key(): ent for ent in prop_parser}
 
 
-# Mock Source using the collection parsed in setUp.
-def Source(collection, key):
+# Mock SOURCE using the collection parsed in setUp.
+def SOURCE(collection, key):
     return collection.get(key, None).get_val()
 
 
@@ -47,8 +47,8 @@ class TestCopy(unittest.TestCase):
     def test_copy(self):
         msg = FTL.Entity(
             FTL.Identifier('foo'),
-            value=Copy(
-                Source(self.props, 'foo')
+            value=COPY(
+                SOURCE(self.props, 'foo')
             )
         )
 
@@ -60,8 +60,8 @@ class TestCopy(unittest.TestCase):
     def test_copy_escape_unicode_middle(self):
         msg = FTL.Entity(
             FTL.Identifier('foo-unicode-middle'),
-            value=Copy(
-                Source(self.props, 'foo.unicode.middle')
+            value=COPY(
+                SOURCE(self.props, 'foo.unicode.middle')
             )
         )
 
@@ -73,8 +73,8 @@ class TestCopy(unittest.TestCase):
     def test_copy_escape_unicode_begin(self):
         msg = FTL.Entity(
             FTL.Identifier('foo-unicode-begin'),
-            value=Copy(
-                Source(self.props, 'foo.unicode.begin')
+            value=COPY(
+                SOURCE(self.props, 'foo.unicode.begin')
             )
         )
 
@@ -86,8 +86,8 @@ class TestCopy(unittest.TestCase):
     def test_copy_escape_unicode_end(self):
         msg = FTL.Entity(
             FTL.Identifier('foo-unicode-end'),
-            value=Copy(
-                Source(self.props, 'foo.unicode.end')
+            value=COPY(
+                SOURCE(self.props, 'foo.unicode.end')
             )
         )
 
@@ -99,8 +99,8 @@ class TestCopy(unittest.TestCase):
     def test_copy_html_entity(self):
         msg = FTL.Entity(
             FTL.Identifier('foo-html-entity'),
-            value=Copy(
-                Source(self.props, 'foo.html.entity')
+            value=COPY(
+                SOURCE(self.props, 'foo.html.entity')
             )
         )
 
@@ -122,8 +122,8 @@ class TestReplace(unittest.TestCase):
     def test_replace_one(self):
         msg = FTL.Entity(
             FTL.Identifier('hello'),
-            value=Replace(
-                Source(self.props, 'hello'),
+            value=REPLACE(
+                SOURCE(self.props, 'hello'),
                 {'#1': [FTL.ExternalArgument('username')]}
             )
         )
@@ -136,8 +136,8 @@ class TestReplace(unittest.TestCase):
     def test_replace_two(self):
         msg = FTL.Entity(
             FTL.Identifier('welcome'),
-            value=Replace(
-                Source(self.props, 'welcome'),
+            value=REPLACE(
+                SOURCE(self.props, 'welcome'),
                 {'#1': [FTL.ExternalArgument('username')],
                  '#2': [FTL.ExternalArgument('appname')]}
             )
@@ -151,8 +151,8 @@ class TestReplace(unittest.TestCase):
     def test_replace_too_many(self):
         msg = FTL.Entity(
             FTL.Identifier('welcome'),
-            value=Replace(
-                Source(self.props, 'welcome'),
+            value=REPLACE(
+                SOURCE(self.props, 'welcome'),
                 {'#1': [FTL.ExternalArgument('username')],
                  '#2': [FTL.ExternalArgument('appname')],
                  '#3': [FTL.ExternalArgument('extraname')]}
@@ -167,8 +167,8 @@ class TestReplace(unittest.TestCase):
     def test_replace_too_few(self):
         msg = FTL.Entity(
             FTL.Identifier('welcome'),
-            value=Replace(
-                Source(self.props, 'welcome'),
+            value=REPLACE(
+                SOURCE(self.props, 'welcome'),
                 {'#1': [FTL.ExternalArgument('username')]}
             )
         )
@@ -181,8 +181,8 @@ class TestReplace(unittest.TestCase):
     def test_replace_first(self):
         msg = FTL.Entity(
             FTL.Identifier('first'),
-            value=Replace(
-                Source(self.props, 'first'),
+            value=REPLACE(
+                SOURCE(self.props, 'first'),
                 {'#1': [FTL.ExternalArgument('foo')]}
             )
         )
@@ -195,8 +195,8 @@ class TestReplace(unittest.TestCase):
     def test_replace_last(self):
         msg = FTL.Entity(
             FTL.Identifier('last'),
-            value=Replace(
-                Source(self.props, 'last'),
+            value=REPLACE(
+                SOURCE(self.props, 'last'),
                 {'#1': [FTL.ExternalArgument('bar')]}
             )
         )
@@ -216,10 +216,10 @@ class TestPlural(unittest.TestCase):
     def test_plural(self):
         msg = FTL.Entity(
             FTL.Identifier('delete-all'),
-            value=Plural(
-                Source(self.props, 'deleteAll'),
+            value=PLURAL(
+                SOURCE(self.props, 'deleteAll'),
                 FTL.ExternalArgument('num'),
-                lambda var: Copy(var)
+                lambda var: COPY(var)
             )
         )
 
@@ -243,10 +243,10 @@ class TestPluralReplace(unittest.TestCase):
     def test_plural_replace(self):
         msg = FTL.Entity(
             FTL.Identifier('delete-all'),
-            value=Plural(
-                Source(self.props, 'deleteAll'),
+            value=PLURAL(
+                SOURCE(self.props, 'deleteAll'),
                 FTL.ExternalArgument('num'),
-                lambda var: Replace(
+                lambda var: REPLACE(
                     var,
                     {'#1': [FTL.ExternalArgument('num')]}
                 )

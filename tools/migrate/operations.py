@@ -1,7 +1,7 @@
 import l20n.format.ast as FTL
 
 
-def Copy(source):
+def COPY(source):
     """Copy the translation value from the given source.
 
     The translation must be a simple value without interpolations nor plural
@@ -30,7 +30,7 @@ def Copy(source):
     )
 
 
-def Replace(source, repls):
+def REPLACE(source, repls):
     """Replace various placeables in the translation with FTL placeables.
 
     The original placeables are defined as keys on the `repls` dict.  For each
@@ -78,7 +78,7 @@ def Replace(source, repls):
     )
 
 
-def Plural(source, selector, foreach):
+def PLURAL(source, selector, foreach):
     """Reconstruct plural variants.
 
     Build an `FTL.SelectExpression` with the supplied `selector` and variants
