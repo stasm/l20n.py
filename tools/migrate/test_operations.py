@@ -8,9 +8,24 @@ import l20n.format.ast as FTL
 from operations import Copy, Replace, Plural
 
 
-# Nicer indentation for FTL code
+ftl_serializer = FTLSerializer()
+
+
 def ftl(string):
+    """Nicer indentation for FTL code."""
     return textwrap.dedent(string[1:])
+
+
+def serialize(node):
+    return ftl_serializer.dumpEntry(node.toJSON())
+
+
+def parse(string):
+    # Parse properties into the internal Context.
+    prop_parser = PropertiesParser()
+    prop_parser.readContents(string)
+    # Transform the parsed result which is an iterator into a dict.
+    return {ent.get_key(): ent for ent in prop_parser}
 
 
 # Mock Source using the collection parsed in setUp.
@@ -18,14 +33,9 @@ def Source(collection, key):
     return collection.get(key, None).get_val()
 
 
-class TestCopyOperation(unittest.TestCase):
+class TestCopy(unittest.TestCase):
     def setUp(self):
-        ftl_serializer = FTLSerializer()
-        self.serialize = lambda node: ftl_serializer.dumpEntry(node.toJSON())
-
-        # Parse properties into the internal Context.
-        self.prop_parser = PropertiesParser()
-        self.prop_parser.readContents('''
+        self.props = parse('''
             foo = Foo
             foo.unicode.middle = Foo\\u0020Bar
             foo.unicode.begin = \\u0020Foo
@@ -33,8 +43,6 @@ class TestCopyOperation(unittest.TestCase):
 
             foo.html.entity = &lt;&#x21E7;&#x2318;K&gt;
         ''')
-        # Transform the parsed result which is an iterator into a dict.
-        self.props = {ent.get_key(): ent for ent in self.prop_parser}
 
     def test_copy(self):
         msg = FTL.Entity(
@@ -45,7 +53,7 @@ class TestCopyOperation(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.serialize(msg),
+            serialize(msg),
             'foo = Foo\n'
         )
 
@@ -58,7 +66,7 @@ class TestCopyOperation(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.serialize(msg),
+            serialize(msg),
             'foo-unicode-middle = Foo Bar\n'
         )
 
@@ -71,7 +79,7 @@ class TestCopyOperation(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.serialize(msg),
+            serialize(msg),
             'foo-unicode-begin = " Foo"\n'
         )
 
@@ -84,7 +92,7 @@ class TestCopyOperation(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.serialize(msg),
+            serialize(msg),
             'foo-unicode-end = "Foo "\n'
         )
 
@@ -97,26 +105,19 @@ class TestCopyOperation(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.serialize(msg),
+            serialize(msg),
             'foo-html-entity = &lt;&#x21E7;&#x2318;K&gt;\n'
         )
 
 
-class TestReplaceOperation(unittest.TestCase):
+class TestReplace(unittest.TestCase):
     def setUp(self):
-        ftl_serializer = FTLSerializer()
-        self.serialize = lambda node: ftl_serializer.dumpEntry(node.toJSON())
-
-        # Parse properties into the internal Context.
-        self.prop_parser = PropertiesParser()
-        self.prop_parser.readContents('''
+        self.props = parse('''
             hello = Hello, #1!
             welcome = Welcome, #1, to #2!
             first = #1 Bar
             last = Foo #1
         ''')
-        # Transform the parsed result which is an iterator into a dict.
-        self.props = {ent.get_key(): ent for ent in self.prop_parser}
 
     def test_replace_one(self):
         msg = FTL.Entity(
@@ -128,7 +129,7 @@ class TestReplaceOperation(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.serialize(msg),
+            serialize(msg),
             'hello = Hello, { $username }!\n'
         )
 
@@ -143,7 +144,7 @@ class TestReplaceOperation(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.serialize(msg),
+            serialize(msg),
             'welcome = Welcome, { $username }, to { $appname }!\n'
         )
 
@@ -159,7 +160,7 @@ class TestReplaceOperation(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.serialize(msg),
+            serialize(msg),
             'welcome = Welcome, { $username }, to { $appname }!\n'
         )
 
@@ -173,7 +174,7 @@ class TestReplaceOperation(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.serialize(msg),
+            serialize(msg),
             'welcome = Welcome, { $username }, to #2!\n'
         )
 
@@ -187,7 +188,7 @@ class TestReplaceOperation(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.serialize(msg),
+            serialize(msg),
             'first = { $foo } Bar\n'
         )
 
@@ -201,23 +202,16 @@ class TestReplaceOperation(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.serialize(msg),
+            serialize(msg),
             'last = Foo { $bar }\n'
         )
 
 
-class TestPluralOperation(unittest.TestCase):
+class TestPlural(unittest.TestCase):
     def setUp(self):
-        ftl_serializer = FTLSerializer()
-        self.serialize = lambda node: ftl_serializer.dumpEntry(node.toJSON())
-
-        # Parse properties into the internal Context.
-        self.prop_parser = PropertiesParser()
-        self.prop_parser.readContents('''
+        self.props = parse('''
             deleteAll=Delete this download?;Delete all downloads?
         ''')
-        # Transform the parsed result which is an iterator into a dict.
-        self.props = {ent.get_key(): ent for ent in self.prop_parser}
 
     def test_plural(self):
         msg = FTL.Entity(
@@ -230,7 +224,7 @@ class TestPluralOperation(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.serialize(msg),
+            serialize(msg),
             ftl('''
                 delete-all = { $num ->
                   [one] Delete this download?
@@ -240,18 +234,11 @@ class TestPluralOperation(unittest.TestCase):
         )
 
 
-class TestPluralReplaceOperation(unittest.TestCase):
+class TestPluralReplace(unittest.TestCase):
     def setUp(self):
-        ftl_serializer = FTLSerializer()
-        self.serialize = lambda node: ftl_serializer.dumpEntry(node.toJSON())
-
-        # Parse properties into the internal Context.
-        self.prop_parser = PropertiesParser()
-        self.prop_parser.readContents('''
+        self.props = parse('''
             deleteAll=Delete this download?;Delete #1 downloads?
         ''')
-        # Transform the parsed result which is an iterator into a dict.
-        self.props = {ent.get_key(): ent for ent in self.prop_parser}
 
     def test_plural_replace(self):
         msg = FTL.Entity(
@@ -267,7 +254,7 @@ class TestPluralReplaceOperation(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.serialize(msg),
+            serialize(msg),
             ftl('''
                 delete-all = { $num ->
                   [one] Delete this download?
