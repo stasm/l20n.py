@@ -1,7 +1,7 @@
 import unittest
 import textwrap
 
-from compare_locales.parser import PropertiesParser
+from compare_locales.parser import PropertiesParser, DTDParser
 from l20n.format.serializer import FTLSerializer
 import l20n.format.ast as FTL
 
@@ -356,10 +356,10 @@ class TestConcatCopy(unittest.TestCase):
 
 class TestConcatLiteral(unittest.TestCase):
     def setUp(self):
-        self.strings = parse(PropertiesParser, '''
-            update.failed.start    = Update failed.\\u0020
-            update.failed.linkText = Download manually
-            update.failed.end      = !
+        self.strings = parse(DTDParser, '''
+            <!ENTITY update.failed.start        "Update failed. ">
+            <!ENTITY update.failed.linkText     "Download manually">
+            <!ENTITY update.failed.end          "!">
         ''')
 
     def test_concat_literal(self):
@@ -390,9 +390,9 @@ class TestConcatLiteral(unittest.TestCase):
 
 class TestConcatInterpolate(unittest.TestCase):
     def setUp(self):
-        self.strings = parse(PropertiesParser, '''
-            channel.description.start = You are on the\\u0020
-            channel.description.end   = \\u0020channel.\\u0020
+        self.strings = parse(DTDParser, '''
+            <!ENTITY channel.description.start  "You are on the ">
+            <!ENTITY channel.description.end    " channel. ">
         ''')
 
     def test_concat_replace(self):
