@@ -3,7 +3,7 @@
 import unittest
 
 import l20n.format.ast as FTL
-from compare_locales.parser import PropertiesParser
+from compare_locales.parser import PropertiesParser, DTDParser
 from util import parse, serialize, ftl
 
 from operations import COPY
@@ -97,6 +97,42 @@ class TestCopy(unittest.TestCase):
             serialize(msg),
             ftl('''
                 foo-html-entity = &lt;&#x21E7;&#x2318;K&gt;
+            ''')
+        )
+
+
+class TestCopyTraits(unittest.TestCase):
+    def setUp(self):
+        self.strings = parse(DTDParser, '''
+            <!ENTITY checkForUpdatesButton.label       "Check for updates">
+            <!ENTITY checkForUpdatesButton.accesskey   "C">
+        ''')
+
+    def test_copy_accesskey(self):
+        msg = FTL.Entity(
+            FTL.Identifier('check-for-updates'),
+            traits=[
+                FTL.Member(
+                    FTL.Keyword('label', 'xul'),
+                    COPY(
+                        SOURCE(self.strings, 'checkForUpdatesButton.label')
+                    )
+                ),
+                FTL.Member(
+                    FTL.Keyword('accesskey', 'xul'),
+                    COPY(
+                        SOURCE(self.strings, 'checkForUpdatesButton.accesskey')
+                    )
+                ),
+            ]
+        )
+
+        self.assertEqual(
+            serialize(msg),
+            ftl('''
+                check-for-updates =
+                  [xul/label] Check for updates
+                  [xul/accesskey] C
             ''')
         )
 
