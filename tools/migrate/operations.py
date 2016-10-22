@@ -30,6 +30,21 @@ def COPY(source):
     )
 
 
+def INTERPOLATE(name):
+    """Create an FTL placeable with the external argument `name`
+
+    This is a common use-case when joining translations with CONCAT.
+    """
+    external = FTL.ExternalArgument(name)
+    elements = [FTL.Placeable([external])]
+
+    return FTL.Pattern(
+        None,
+        elements,
+        quoteDelim=False
+    )
+
+
 def REPLACE(source, repls):
     """Replace various placeables in the translation with FTL placeables.
 

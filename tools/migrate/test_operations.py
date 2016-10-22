@@ -5,7 +5,7 @@ from compare_locales.parser import PropertiesParser
 from l20n.format.serializer import FTLSerializer
 import l20n.format.ast as FTL
 
-from operations import COPY, REPLACE, PLURAL, CONCAT
+from operations import COPY, INTERPOLATE, REPLACE, PLURAL, CONCAT
 
 
 ftl_serializer = FTLSerializer()
@@ -384,6 +384,35 @@ class TestConcatLiteral(unittest.TestCase):
             serialize(msg),
             ftl('''
                 update-failed = Update failed. <a>Download manually</a>!
+            ''')
+        )
+
+
+class TestConcatInterpolate(unittest.TestCase):
+    def setUp(self):
+        self.props = parse('''
+            channel.description.start = You are on the\\u0020
+            channel.description.end   = \\u0020channel.\\u0020
+        ''')
+
+    def test_concat_replace(self):
+        msg = FTL.Entity(
+            FTL.Identifier('channel-desc'),
+            value=CONCAT(
+                COPY(
+                    SOURCE(self.props, 'channel.description.start'),
+                ),
+                INTERPOLATE('channelname'),
+                COPY(
+                    SOURCE(self.props, 'channel.description.end'),
+                )
+            )
+        )
+
+        self.assertEqual(
+            serialize(msg),
+            ftl('''
+                channel-desc = "You are on the { $channelname } channel. "
             ''')
         )
 
