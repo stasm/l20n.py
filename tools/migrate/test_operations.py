@@ -240,5 +240,42 @@ class TestPluralOperation(unittest.TestCase):
         )
 
 
+class TestPluralReplaceOperation(unittest.TestCase):
+    def setUp(self):
+        ftl_serializer = FTLSerializer()
+        self.serialize = lambda node: ftl_serializer.dumpEntry(node.toJSON())
+
+        # Parse properties into the internal Context.
+        self.prop_parser = PropertiesParser()
+        self.prop_parser.readContents('''
+            deleteAll=Delete this download?;Delete #1 downloads?
+        ''')
+        # Transform the parsed result which is an iterator into a dict.
+        self.props = {ent.get_key(): ent for ent in self.prop_parser}
+
+    def test_plural_replace(self):
+        msg = FTL.Entity(
+            FTL.Identifier('delete-all'),
+            value=Plural(
+                Source(self.props, 'deleteAll'),
+                FTL.ExternalArgument('num'),
+                lambda var: Replace(
+                    var,
+                    {'#1': [FTL.ExternalArgument('num')]}
+                )
+            )
+        )
+
+        self.assertEqual(
+            self.serialize(msg),
+            ftl('''
+                delete-all = { $num ->
+                  [one] Delete this download?
+                 *[other] Delete { $num } downloads?
+                }
+            ''')
+        )
+
+
 if __name__ == '__main__':
     unittest.main()
