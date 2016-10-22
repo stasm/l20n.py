@@ -59,7 +59,7 @@ def REPLACE(source, repls):
         text_before = FTL.TextElement(before)
         placeable = FTL.Placeable(repls[sep])
         text_after = FTL.TextElement(after)
-        # Return the elemets found and converted so far, and the remaining text
+        # Return the elements found and converted so far, and the remaining text
         # which hasn't been scanned for placeables yet.
         return parts + [text_before, placeable], text_after
 
@@ -83,7 +83,7 @@ def PLURAL(source, selector, foreach):
 
     Build an `FTL.SelectExpression` with the supplied `selector` and variants
     extracted from the `source`.  Each variant will be run through the
-    `foreach` function.  It should return an FTL Node.
+    `foreach` function.  It should return an `FTL.Pattern`.
     """
     variants = source.split(';')
     # XXX This should be configurable
@@ -108,4 +108,22 @@ def PLURAL(source, selector, foreach):
         None,
         elements,
         quoteDelim=False
+    )
+
+
+def CONCAT(*patterns):
+    """Concatenate elements of many patterns."""
+
+    # Flatten the list of patterns of which each has a list of elements.
+    elements = [elems for pattern in patterns for elems in pattern.elements]
+
+    quoteDelim = ((type(elements[0]) is FTL.TextElement and
+                   elements[0].value.startswith(' ')) or
+                  (type(elements[-1]) is FTL.TextElement and
+                   elements[-1].value.endswith(' ')))
+
+    return FTL.Pattern(
+        None,
+        elements,
+        quoteDelim
     )

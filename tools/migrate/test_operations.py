@@ -5,7 +5,7 @@ from compare_locales.parser import PropertiesParser
 from l20n.format.serializer import FTLSerializer
 import l20n.format.ast as FTL
 
-from operations import COPY, REPLACE, PLURAL
+from operations import COPY, REPLACE, PLURAL, CONCAT
 
 
 ftl_serializer = FTLSerializer()
@@ -260,6 +260,96 @@ class TestPluralReplace(unittest.TestCase):
                   [one] Delete this download?
                  *[other] Delete { $num } downloads?
                 }
+            ''')
+        )
+
+
+class TestConcat(unittest.TestCase):
+    def setUp(self):
+        self.props = parse('''
+            hello = Hello, world!
+            hello.start = Hello,\\u0020
+            hello.end = world!
+            whitespace.begin.start = \\u0020Hello,\\u0020
+            whitespace.begin.end = world!
+            whitespace.end.start = Hello,\\u0020
+            whitespace.end.end = world!\\u0020
+        ''')
+
+    def test_concat_one(self):
+        msg = FTL.Entity(
+            FTL.Identifier('hello'),
+            value=CONCAT(
+                COPY(
+                    SOURCE(self.props, 'hello'),
+                ),
+            )
+        )
+
+        self.assertEqual(
+            serialize(msg),
+            ftl('''
+                hello = Hello, world!
+            ''')
+        )
+
+    def test_concat_two(self):
+        msg = FTL.Entity(
+            FTL.Identifier('hello'),
+            value=CONCAT(
+                COPY(
+                    SOURCE(self.props, 'hello.start'),
+                ),
+                COPY(
+                    SOURCE(self.props, 'hello.end'),
+                )
+            )
+        )
+
+        self.assertEqual(
+            serialize(msg),
+            ftl('''
+                hello = Hello, world!
+            ''')
+        )
+
+    def test_concat_whitespace_begin(self):
+        msg = FTL.Entity(
+            FTL.Identifier('hello'),
+            value=CONCAT(
+                COPY(
+                    SOURCE(self.props, 'whitespace.begin.start'),
+                ),
+                COPY(
+                    SOURCE(self.props, 'whitespace.begin.end'),
+                )
+            )
+        )
+
+        self.assertEqual(
+            serialize(msg),
+            ftl('''
+                hello = " Hello, world!"
+            ''')
+        )
+
+    def test_concat_whitespace_end(self):
+        msg = FTL.Entity(
+            FTL.Identifier('hello'),
+            value=CONCAT(
+                COPY(
+                    SOURCE(self.props, 'whitespace.end.start'),
+                ),
+                COPY(
+                    SOURCE(self.props, 'whitespace.end.end'),
+                )
+            )
+        )
+
+        self.assertEqual(
+            serialize(msg),
+            ftl('''
+                hello = "Hello, world! "
             ''')
         )
 
