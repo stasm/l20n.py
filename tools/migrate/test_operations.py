@@ -20,12 +20,12 @@ def serialize(node):
     return ftl_serializer.dumpEntry(node.toJSON())
 
 
-def parse(string):
-    # Parse properties into the internal Context.
-    prop_parser = PropertiesParser()
-    prop_parser.readContents(string)
+def parse(Parser, string):
+    # Parse the string into the internal Context.
+    parser = Parser()
+    parser.readContents(string)
     # Transform the parsed result which is an iterator into a dict.
-    return {ent.get_key(): ent for ent in prop_parser}
+    return {ent.get_key(): ent for ent in parser}
 
 
 # Mock SOURCE using the collection parsed in setUp.
@@ -35,7 +35,7 @@ def SOURCE(collection, key):
 
 class TestCopy(unittest.TestCase):
     def setUp(self):
-        self.props = parse('''
+        self.strings = parse(PropertiesParser, '''
             foo = Foo
             foo.unicode.middle = Foo\\u0020Bar
             foo.unicode.begin = \\u0020Foo
@@ -48,7 +48,7 @@ class TestCopy(unittest.TestCase):
         msg = FTL.Entity(
             FTL.Identifier('foo'),
             value=COPY(
-                SOURCE(self.props, 'foo')
+                SOURCE(self.strings, 'foo')
             )
         )
 
@@ -61,7 +61,7 @@ class TestCopy(unittest.TestCase):
         msg = FTL.Entity(
             FTL.Identifier('foo-unicode-middle'),
             value=COPY(
-                SOURCE(self.props, 'foo.unicode.middle')
+                SOURCE(self.strings, 'foo.unicode.middle')
             )
         )
 
@@ -74,7 +74,7 @@ class TestCopy(unittest.TestCase):
         msg = FTL.Entity(
             FTL.Identifier('foo-unicode-begin'),
             value=COPY(
-                SOURCE(self.props, 'foo.unicode.begin')
+                SOURCE(self.strings, 'foo.unicode.begin')
             )
         )
 
@@ -87,7 +87,7 @@ class TestCopy(unittest.TestCase):
         msg = FTL.Entity(
             FTL.Identifier('foo-unicode-end'),
             value=COPY(
-                SOURCE(self.props, 'foo.unicode.end')
+                SOURCE(self.strings, 'foo.unicode.end')
             )
         )
 
@@ -100,7 +100,7 @@ class TestCopy(unittest.TestCase):
         msg = FTL.Entity(
             FTL.Identifier('foo-html-entity'),
             value=COPY(
-                SOURCE(self.props, 'foo.html.entity')
+                SOURCE(self.strings, 'foo.html.entity')
             )
         )
 
@@ -112,7 +112,7 @@ class TestCopy(unittest.TestCase):
 
 class TestReplace(unittest.TestCase):
     def setUp(self):
-        self.props = parse('''
+        self.strings = parse(PropertiesParser, '''
             hello = Hello, #1!
             welcome = Welcome, #1, to #2!
             first = #1 Bar
@@ -123,7 +123,7 @@ class TestReplace(unittest.TestCase):
         msg = FTL.Entity(
             FTL.Identifier('hello'),
             value=REPLACE(
-                SOURCE(self.props, 'hello'),
+                SOURCE(self.strings, 'hello'),
                 {'#1': [FTL.ExternalArgument('username')]}
             )
         )
@@ -137,7 +137,7 @@ class TestReplace(unittest.TestCase):
         msg = FTL.Entity(
             FTL.Identifier('welcome'),
             value=REPLACE(
-                SOURCE(self.props, 'welcome'),
+                SOURCE(self.strings, 'welcome'),
                 {'#1': [FTL.ExternalArgument('username')],
                  '#2': [FTL.ExternalArgument('appname')]}
             )
@@ -152,7 +152,7 @@ class TestReplace(unittest.TestCase):
         msg = FTL.Entity(
             FTL.Identifier('welcome'),
             value=REPLACE(
-                SOURCE(self.props, 'welcome'),
+                SOURCE(self.strings, 'welcome'),
                 {'#1': [FTL.ExternalArgument('username')],
                  '#2': [FTL.ExternalArgument('appname')],
                  '#3': [FTL.ExternalArgument('extraname')]}
@@ -168,7 +168,7 @@ class TestReplace(unittest.TestCase):
         msg = FTL.Entity(
             FTL.Identifier('welcome'),
             value=REPLACE(
-                SOURCE(self.props, 'welcome'),
+                SOURCE(self.strings, 'welcome'),
                 {'#1': [FTL.ExternalArgument('username')]}
             )
         )
@@ -182,7 +182,7 @@ class TestReplace(unittest.TestCase):
         msg = FTL.Entity(
             FTL.Identifier('first'),
             value=REPLACE(
-                SOURCE(self.props, 'first'),
+                SOURCE(self.strings, 'first'),
                 {'#1': [FTL.ExternalArgument('foo')]}
             )
         )
@@ -196,7 +196,7 @@ class TestReplace(unittest.TestCase):
         msg = FTL.Entity(
             FTL.Identifier('last'),
             value=REPLACE(
-                SOURCE(self.props, 'last'),
+                SOURCE(self.strings, 'last'),
                 {'#1': [FTL.ExternalArgument('bar')]}
             )
         )
@@ -209,7 +209,7 @@ class TestReplace(unittest.TestCase):
 
 class TestPlural(unittest.TestCase):
     def setUp(self):
-        self.props = parse('''
+        self.strings = parse(PropertiesParser, '''
             deleteAll=Delete this download?;Delete all downloads?
         ''')
 
@@ -217,7 +217,7 @@ class TestPlural(unittest.TestCase):
         msg = FTL.Entity(
             FTL.Identifier('delete-all'),
             value=PLURAL(
-                SOURCE(self.props, 'deleteAll'),
+                SOURCE(self.strings, 'deleteAll'),
                 FTL.ExternalArgument('num'),
                 lambda var: COPY(var)
             )
@@ -236,7 +236,7 @@ class TestPlural(unittest.TestCase):
 
 class TestPluralReplace(unittest.TestCase):
     def setUp(self):
-        self.props = parse('''
+        self.strings = parse(PropertiesParser, '''
             deleteAll=Delete this download?;Delete #1 downloads?
         ''')
 
@@ -244,7 +244,7 @@ class TestPluralReplace(unittest.TestCase):
         msg = FTL.Entity(
             FTL.Identifier('delete-all'),
             value=PLURAL(
-                SOURCE(self.props, 'deleteAll'),
+                SOURCE(self.strings, 'deleteAll'),
                 FTL.ExternalArgument('num'),
                 lambda var: REPLACE(
                     var,
@@ -266,7 +266,7 @@ class TestPluralReplace(unittest.TestCase):
 
 class TestConcatCopy(unittest.TestCase):
     def setUp(self):
-        self.props = parse('''
+        self.strings = parse(PropertiesParser, '''
             hello = Hello, world!
             hello.start = Hello,\\u0020
             hello.end = world!
@@ -281,7 +281,7 @@ class TestConcatCopy(unittest.TestCase):
             FTL.Identifier('hello'),
             value=CONCAT(
                 COPY(
-                    SOURCE(self.props, 'hello'),
+                    SOURCE(self.strings, 'hello'),
                 ),
             )
         )
@@ -298,10 +298,10 @@ class TestConcatCopy(unittest.TestCase):
             FTL.Identifier('hello'),
             value=CONCAT(
                 COPY(
-                    SOURCE(self.props, 'hello.start'),
+                    SOURCE(self.strings, 'hello.start'),
                 ),
                 COPY(
-                    SOURCE(self.props, 'hello.end'),
+                    SOURCE(self.strings, 'hello.end'),
                 )
             )
         )
@@ -318,10 +318,10 @@ class TestConcatCopy(unittest.TestCase):
             FTL.Identifier('hello'),
             value=CONCAT(
                 COPY(
-                    SOURCE(self.props, 'whitespace.begin.start'),
+                    SOURCE(self.strings, 'whitespace.begin.start'),
                 ),
                 COPY(
-                    SOURCE(self.props, 'whitespace.begin.end'),
+                    SOURCE(self.strings, 'whitespace.begin.end'),
                 )
             )
         )
@@ -338,10 +338,10 @@ class TestConcatCopy(unittest.TestCase):
             FTL.Identifier('hello'),
             value=CONCAT(
                 COPY(
-                    SOURCE(self.props, 'whitespace.end.start'),
+                    SOURCE(self.strings, 'whitespace.end.start'),
                 ),
                 COPY(
-                    SOURCE(self.props, 'whitespace.end.end'),
+                    SOURCE(self.strings, 'whitespace.end.end'),
                 )
             )
         )
@@ -356,7 +356,7 @@ class TestConcatCopy(unittest.TestCase):
 
 class TestConcatLiteral(unittest.TestCase):
     def setUp(self):
-        self.props = parse('''
+        self.strings = parse(PropertiesParser, '''
             update.failed.start    = Update failed.\\u0020
             update.failed.linkText = Download manually
             update.failed.end      = !
@@ -367,15 +367,15 @@ class TestConcatLiteral(unittest.TestCase):
             FTL.Identifier('update-failed'),
             value=CONCAT(
                 COPY(
-                    SOURCE(self.props, 'update.failed.start'),
+                    SOURCE(self.strings, 'update.failed.start'),
                 ),
                 COPY('<a>'),
                 COPY(
-                    SOURCE(self.props, 'update.failed.linkText'),
+                    SOURCE(self.strings, 'update.failed.linkText'),
                 ),
                 COPY('</a>'),
                 COPY(
-                    SOURCE(self.props, 'update.failed.end'),
+                    SOURCE(self.strings, 'update.failed.end'),
                 ),
             )
         )
@@ -390,7 +390,7 @@ class TestConcatLiteral(unittest.TestCase):
 
 class TestConcatInterpolate(unittest.TestCase):
     def setUp(self):
-        self.props = parse('''
+        self.strings = parse(PropertiesParser, '''
             channel.description.start = You are on the\\u0020
             channel.description.end   = \\u0020channel.\\u0020
         ''')
@@ -400,11 +400,11 @@ class TestConcatInterpolate(unittest.TestCase):
             FTL.Identifier('channel-desc'),
             value=CONCAT(
                 COPY(
-                    SOURCE(self.props, 'channel.description.start'),
+                    SOURCE(self.strings, 'channel.description.start'),
                 ),
                 INTERPOLATE('channelname'),
                 COPY(
-                    SOURCE(self.props, 'channel.description.end'),
+                    SOURCE(self.strings, 'channel.description.end'),
                 )
             )
         )
