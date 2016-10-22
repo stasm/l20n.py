@@ -23,13 +23,10 @@ def Copy(source):
     # XXX Perhaps there's a strict subset of HTML entities which must or must
     # not be replaced?
 
-    # Entity.get_val() returns already parsed characters for \uXXXX encodings.
-    text = source.get_val()
-
     return FTL.Pattern(
         None,
-        [FTL.TextElement(text)],
-        quoteDelim=text.startswith(' ') or text.endswith(' ')
+        [FTL.TextElement(source)],
+        quoteDelim=source.startswith(' ') or source.endswith(' ')
     )
 
 
@@ -40,13 +37,12 @@ def Replace(source, repls):
     key the value is defined as a list of FTL Expressions to be interpolated.
     """
 
-    text = source.get_val()
     # Only replace placeable which are present in the translation.
-    repls = {k: v for k, v in repls.iteritems() if k in text}
+    repls = {k: v for k, v in repls.iteritems() if k in source}
     # Order the original placeables by their position in the translation.
     keys_in_order = sorted(
         repls.keys(),
-        lambda x, y: text.find(x) - text.find(y)
+        lambda x, y: source.find(x) - source.find(y)
     )
 
     # Used to reduce the `keys_in_order` list.
@@ -69,7 +65,7 @@ def Replace(source, repls):
 
     # Start with an empty list of elements and the original translation. It's
     # wrapped in `FTL.TextElement` here to transparently work with `replace`.
-    init = ([], FTL.TextElement(text))
+    init = ([], FTL.TextElement(source))
     parts, tail = reduce(replace, keys_in_order, init)
     # We need to explicitly concat the trailing text to get the full list of
     # elements.
@@ -78,5 +74,38 @@ def Replace(source, repls):
     return FTL.Pattern(
         None,
         elements,
-        quoteDelim=text.startswith(' ') or text.endswith(' ')
+        quoteDelim=source.startswith(' ') or source.endswith(' ')
+    )
+
+
+def Plural(source, selector, foreach):
+    """Reconstruct plural variants.
+
+    Build an `FTL.SelectExpression` with the supplied `selector` and variants
+    extracted from the `source`.  Each variant will be run through the
+    `foreach` function.  It should return an FTL Node.
+    """
+    variants = source.split(';')
+    # XXX This should be configurable
+    plural_categories = iter(('one', 'other'))
+
+    def createMember(variant):
+        category = next(plural_categories)
+        return FTL.Member(
+            FTL.Keyword(category),
+            foreach(variant),
+            default=category == 'other'
+        )
+
+    select = FTL.SelectExpression(
+        selector,
+        variants=map(createMember, variants)
+    )
+
+    elements = [FTL.Placeable([select])]
+
+    return FTL.Pattern(
+        None,
+        elements,
+        quoteDelim=False
     )

@@ -1,15 +1,21 @@
 import unittest
+import textwrap
 
 from compare_locales.parser import PropertiesParser
 from l20n.format.serializer import FTLSerializer
 import l20n.format.ast as FTL
 
-from operations import Copy, Replace
+from operations import Copy, Replace, Plural
+
+
+# Nicer indentation for FTL code
+def ftl(string):
+    return textwrap.dedent(string[1:])
 
 
 # Mock Source using the collection parsed in setUp.
 def Source(collection, key):
-    return collection.get(key, None)
+    return collection.get(key, None).get_val()
 
 
 class TestCopyOperation(unittest.TestCase):
@@ -197,6 +203,40 @@ class TestReplaceOperation(unittest.TestCase):
         self.assertEqual(
             self.serialize(msg),
             'last = Foo { $bar }\n'
+        )
+
+
+class TestPluralOperation(unittest.TestCase):
+    def setUp(self):
+        ftl_serializer = FTLSerializer()
+        self.serialize = lambda node: ftl_serializer.dumpEntry(node.toJSON())
+
+        # Parse properties into the internal Context.
+        self.prop_parser = PropertiesParser()
+        self.prop_parser.readContents('''
+            deleteAll=Delete this download?;Delete all downloads?
+        ''')
+        # Transform the parsed result which is an iterator into a dict.
+        self.props = {ent.get_key(): ent for ent in self.prop_parser}
+
+    def test_plural(self):
+        msg = FTL.Entity(
+            FTL.Identifier('delete-all'),
+            value=Plural(
+                Source(self.props, 'deleteAll'),
+                FTL.ExternalArgument('num'),
+                lambda var: Copy(var)
+            )
+        )
+
+        self.assertEqual(
+            self.serialize(msg),
+            ftl('''
+                delete-all = { $num ->
+                  [one] Delete this download?
+                 *[other] Delete all downloads?
+                }
+            ''')
         )
 
 
