@@ -1,13 +1,21 @@
 # coding=utf8
 import textwrap
 
+from l20n.format.parser import FTLParser
 from l20n.format.serializer import FTLSerializer
 
 
+ftl_parser = FTLParser()
 ftl_serializer = FTLSerializer()
 
 
 def parse(Parser, string):
+    if Parser is FTLParser:
+        ast, errors = ftl_parser.parseResource(string)
+        return ast
+
+    # Parsing a legacy resource.
+
     # Parse the string into the internal Context.
     parser = Parser()
     parser.readContents(string)
@@ -17,6 +25,10 @@ def parse(Parser, string):
 
 def dumpEntry(node):
     return ftl_serializer.dumpEntry(node.toJSON())
+
+
+def serialize(resource):
+    return ftl_serializer.serialize(resource.toJSON())
 
 
 def ftl(code):
