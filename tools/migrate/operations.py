@@ -133,6 +133,21 @@ def CONCAT(*patterns):
     # Flatten the list of patterns of which each has a list of elements.
     elements = [elems for pattern in patterns for elems in pattern.elements]
 
+    # Merge adjecent `FTL.TextElement` nodes.
+    def merge_adjecent_text(acc, cur):
+        if len(acc) == 0 or type(cur) != FTL.TextElement:
+            acc.append(cur)
+            return acc
+
+        last = acc[-1]
+        if type(last) == FTL.TextElement:
+            last.value += cur.value
+        else:
+            acc.append(cur)
+        return acc
+
+    elements = reduce(merge_adjecent_text, elements, [])
+
     quoteDelim = ((type(elements[0]) is FTL.TextElement and
                    elements[0].value.startswith(' ')) or
                   (type(elements[-1]) is FTL.TextElement and

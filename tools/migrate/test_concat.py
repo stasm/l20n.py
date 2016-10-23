@@ -57,6 +57,22 @@ class TestConcatCopy(unittest.TestCase):
         )
 
         self.assertEqual(
+            len(msg.value.elements),
+            1,
+            'The constructed value should have only one element'
+        )
+        self.assertIsInstance(
+            msg.value.elements[0],
+            FTL.TextElement,
+            'The constructed element should be a TextElement.'
+        )
+        self.assertEqual(
+            msg.value.elements[0].value,
+            'Hello, world!',
+            'The TextElement should be a concatenation of the sources.'
+        )
+
+        self.assertEqual(
             serialize(msg),
             ftl('''
                 hello = Hello, world!
