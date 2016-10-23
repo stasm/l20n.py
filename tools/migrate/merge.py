@@ -9,6 +9,7 @@ from l20n.format.parser import FTLParser
 from l20n.format.serializer import FTLSerializer
 from compare_locales.parser import getParser
 
+from cldr import get_plural_categories
 from operations import VARIANTS
 
 
@@ -73,7 +74,7 @@ class MergeContext(object):
 
         # An iterable of plural category names relevant to the context's
         # language.  E.g. ('one', 'other') for English.
-        self.plural_categories = ('one', 'other')
+        self.plural_categories = get_plural_categories(lang)
 
         # Paths to directories with input data, relative to CWD.
         self.reference_dir = reference_dir
