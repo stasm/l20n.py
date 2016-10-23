@@ -23,11 +23,18 @@ class TestMerge(unittest.TestCase):
 
             title  = Downloads
             header = Your Downloads
+            empty  = No Downloads
 
             open-menuitem =
                 [html/label] Open
 
             download-state-downloading = Downloading…
+        '''))
+
+        self.ab_cd_ftl = parse(FTLParser, ftl('''
+            # This Source Code Form is subject to the terms of …
+
+            empty = Brak pobranych plików
         '''))
 
         ab_cd_dtd = parse(DTDParser, '''
@@ -72,7 +79,9 @@ class TestMerge(unittest.TestCase):
             )
         ]
 
-        resource = merge(self.en_us_ftl, self.ab_cd_legacy, transforms)
+        resource = merge(
+            self.en_us_ftl, FTL.Resource(), self.ab_cd_legacy, transforms
+        )
 
         self.assertEqual(
             serialize(resource),
@@ -80,6 +89,50 @@ class TestMerge(unittest.TestCase):
                 # This Source Code Form is subject to the terms of …
 
                 title = Pobrane pliki
+                open-menuitem =
+                  [html/label] Otwórz
+                download-state-downloading = Pobieranie…
+            ''')
+        )
+
+    def test_merge_three_way(self):
+        transforms = [
+            FTL.Entity(
+                FTL.Identifier('title'),
+                value=COPY(
+                    SOURCE(self.ab_cd_legacy, 'aboutDownloads.title')
+                )
+            ),
+            FTL.Entity(
+                FTL.Identifier('open-menuitem'),
+                traits=[
+                    FTL.Member(
+                        FTL.Keyword('label', 'html'),
+                        COPY(
+                            SOURCE(self.ab_cd_legacy, 'aboutDownloads.open')
+                        )
+                    ),
+                ]
+            ),
+            FTL.Entity(
+                FTL.Identifier('download-state-downloading'),
+                value=COPY(
+                    SOURCE(self.ab_cd_legacy, 'downloadState.downloading')
+                )
+            )
+        ]
+
+        resource = merge(
+            self.en_us_ftl, self.ab_cd_ftl, self.ab_cd_legacy, transforms
+        )
+
+        self.assertEqual(
+            serialize(resource),
+            ftl('''
+                # This Source Code Form is subject to the terms of …
+
+                title = Pobrane pliki
+                empty = Brak pobranych plików
                 open-menuitem =
                   [html/label] Otwórz
                 download-state-downloading = Pobieranie…

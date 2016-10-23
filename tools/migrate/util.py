@@ -11,7 +11,7 @@ ftl_serializer = FTLSerializer()
 
 def parse(Parser, string):
     if Parser is FTLParser:
-        ast, errors = ftl_parser.parseResource(string)
+        ast, errors = ftl_parser.parse(string)
         return ast
 
     # Parsing a legacy resource.

@@ -633,6 +633,10 @@ class ParseContext():
 
 
 class FTLParser():
+    def parse(self, string):
+        parseContext = ParseContext(string)
+        return parseContext.getResource()
+
     def parseResource(self, string):
         parseContext = ParseContext(string)
         [ast, errors] = parseContext.getResource()
