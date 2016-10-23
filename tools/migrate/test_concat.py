@@ -4,7 +4,7 @@ import unittest
 
 import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser, DTDParser
-from util import parse, serialize, ftl
+from util import parse, dumpEntry, ftl
 
 from operations import COPY, INTERPOLATE, REPLACE, CONCAT
 
@@ -37,7 +37,7 @@ class TestConcatCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 hello = Hello, world!
             ''')
@@ -73,7 +73,7 @@ class TestConcatCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 hello = Hello, world!
             ''')
@@ -93,7 +93,7 @@ class TestConcatCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 hello = " Hello, world!"
             ''')
@@ -113,7 +113,7 @@ class TestConcatCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 hello = "Hello, world! "
             ''')
@@ -147,7 +147,7 @@ class TestConcatLiteral(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 update-failed = Update failed. <a>Download manually</a>!
             ''')
@@ -176,7 +176,7 @@ class TestConcatInterpolate(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 channel-desc = "You are on the { $channelname } channel. "
             ''')
@@ -230,7 +230,7 @@ class TestConcatReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('community = { $brand-short-name } is designed by '
                 '<a>{ $vendor-short-name }</a>, a <a>global community</a> '
                 'working together to…')

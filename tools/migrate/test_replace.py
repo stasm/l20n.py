@@ -4,7 +4,7 @@ import unittest
 
 import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser
-from util import parse, serialize, ftl
+from util import parse, dumpEntry, ftl
 
 from operations import REPLACE
 
@@ -33,7 +33,7 @@ class TestReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 hello = Hello, { $username }!
             ''')
@@ -50,7 +50,7 @@ class TestReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 welcome = Welcome, { $username }, to { $appname }!
             ''')
@@ -68,7 +68,7 @@ class TestReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 welcome = Welcome, { $username }, to { $appname }!
             ''')
@@ -84,7 +84,7 @@ class TestReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 welcome = Welcome, { $username }, to #2!
             ''')
@@ -100,7 +100,7 @@ class TestReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 first = { $foo } Bar
             ''')
@@ -116,7 +116,7 @@ class TestReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 last = Foo { $bar }
             ''')

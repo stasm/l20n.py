@@ -15,7 +15,7 @@ def parse(Parser, string):
     return {ent.get_key(): ent for ent in parser}
 
 
-def serialize(node):
+def dumpEntry(node):
     return ftl_serializer.dumpEntry(node.toJSON())
 
 

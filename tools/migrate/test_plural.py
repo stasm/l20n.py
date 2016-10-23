@@ -4,7 +4,7 @@ import unittest
 
 import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser
-from util import parse, serialize, ftl
+from util import parse, dumpEntry, ftl
 
 from operations import COPY, REPLACE, VARIANTS
 
@@ -36,7 +36,7 @@ class TestPlural(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 delete-all = { $num ->
                   [one] Delete this download?
@@ -66,7 +66,7 @@ class TestPluralReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 delete-all = { $num ->
                   [one] Delete this download?

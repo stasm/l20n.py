@@ -1,3 +1,5 @@
+# coding=utf8
+
 import l20n.format.ast as FTL
 
 

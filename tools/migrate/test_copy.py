@@ -4,7 +4,7 @@ import unittest
 
 import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser, DTDParser
-from util import parse, serialize, ftl
+from util import parse, dumpEntry, ftl
 
 from operations import COPY
 
@@ -34,7 +34,7 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 foo = Foo
             ''')
@@ -49,7 +49,7 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 foo-unicode-middle = Foo Bar
             ''')
@@ -64,7 +64,7 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 foo-unicode-begin = " Foo"
             ''')
@@ -79,7 +79,7 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 foo-unicode-end = "Foo "
             ''')
@@ -94,7 +94,7 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 foo-html-entity = &lt;&#x21E7;&#x2318;K&gt;
             ''')
@@ -128,7 +128,7 @@ class TestCopyTraits(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(msg),
+            dumpEntry(msg),
             ftl('''
                 check-for-updates =
                   [xul/label] Check for updates
