@@ -6,12 +6,17 @@ import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser
 from util import parse, serialize, ftl
 
-from operations import COPY, REPLACE, PLURAL
+from operations import COPY, REPLACE, VARIANTS
 
 
 # Mock SOURCE using the collection parsed in setUp.
 def SOURCE(collection, key):
     return collection.get(key, None).get_val()
+
+
+# Create a PLURALS transform for en-US.
+def PLURALS(source, selector, foreach):
+    return VARIANTS(source, selector, ('one', 'other'), foreach)
 
 
 class TestPlural(unittest.TestCase):
@@ -23,7 +28,7 @@ class TestPlural(unittest.TestCase):
     def test_plural(self):
         msg = FTL.Entity(
             FTL.Identifier('delete-all'),
-            value=PLURAL(
+            value=PLURALS(
                 SOURCE(self.strings, 'deleteAll'),
                 FTL.ExternalArgument('num'),
                 lambda var: COPY(var)
@@ -50,7 +55,7 @@ class TestPluralReplace(unittest.TestCase):
     def test_plural_replace(self):
         msg = FTL.Entity(
             FTL.Identifier('delete-all'),
-            value=PLURAL(
+            value=PLURALS(
                 SOURCE(self.strings, 'deleteAll'),
                 FTL.ExternalArgument('num'),
                 lambda var: REPLACE(

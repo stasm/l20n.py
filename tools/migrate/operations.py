@@ -94,23 +94,22 @@ def REPLACE(source, repls):
     )
 
 
-def PLURAL(source, selector, foreach):
-    """Reconstruct plural variants.
+def VARIANTS(source, selector, keys, foreach):
+    """Convert semicolon-separated variants into a select expression.
 
     Build an `FTL.SelectExpression` with the supplied `selector` and variants
     extracted from the `source`.  Each variant will be run through the
     `foreach` function.  It should return an `FTL.Pattern`.
     """
     variants = source.split(';')
-    # XXX This should be configurable
-    plural_categories = iter(('one', 'other'))
+    keys_iter = iter(keys)
 
     def createMember(variant):
-        category = next(plural_categories)
+        key = next(keys_iter)
         return FTL.Member(
-            FTL.Keyword(category),
+            FTL.Keyword(key),
             foreach(variant),
-            default=category == 'other'
+            default=key == 'other'
         )
 
     select = FTL.SelectExpression(
