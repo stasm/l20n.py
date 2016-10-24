@@ -1,18 +1,10 @@
 # coding=utf8
 
-import os
 import unittest
 
 from util import ftl
-
 from merge import MergeContext
-
-import l20n.format.ast as FTL
 from operations import COPY
-
-
-def path(*args):
-    return os.path.join(os.path.dirname(os.path.realpath(__file__)), *args)
 
 
 class TestMergeContext(unittest.TestCase):
@@ -28,22 +20,19 @@ class TestMergeContext(unittest.TestCase):
         self.ctx.add_legacy('aboutDownloads.properties')
 
     def test_merge_context(self):
+        MESSAGE = self.ctx.create_message()
         SOURCE = self.ctx.create_source()
 
-        self.ctx.add_transforms(
-            'aboutDownloads.ftl',
-            [
-                FTL.Entity(
-                    FTL.Identifier('title'),
-                    value=COPY(
-                        SOURCE(
-                            'aboutDownloads.dtd',
-                            'aboutDownloads.title'
-                        )
+        self.ctx.add_transforms([
+            MESSAGE('aboutDownloads.ftl', 'title')(
+                value=COPY(
+                    SOURCE(
+                        'aboutDownloads.dtd',
+                        'aboutDownloads.title'
                     )
-                ),
-            ]
-        )
+                )
+            ),
+        ])
 
         expected = {
             'aboutDownloads.ftl': ftl('''
@@ -55,7 +44,11 @@ class TestMergeContext(unittest.TestCase):
             ''')
         }
 
+        changeset = {
+            ('aboutDownloads.dtd', 'aboutDownloads.title')
+        }
+
         self.assertDictEqual(
-            self.ctx.merge(),
+            self.ctx.merge(changeset),
             expected
         )

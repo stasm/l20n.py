@@ -80,7 +80,8 @@ class TestMerge(unittest.TestCase):
         ]
 
         resource = merge(
-            self.en_us_ftl, FTL.Resource(), transforms
+            self.en_us_ftl, FTL.Resource(), transforms,
+            in_changeset=lambda x: True
         )
 
         self.assertEqual(
@@ -123,7 +124,8 @@ class TestMerge(unittest.TestCase):
         ]
 
         resource = merge(
-            self.en_us_ftl, self.ab_cd_ftl, transforms
+            self.en_us_ftl, self.ab_cd_ftl, transforms,
+            in_changeset=lambda x: True
         )
 
         self.assertEqual(

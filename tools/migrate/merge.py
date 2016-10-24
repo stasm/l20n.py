@@ -20,16 +20,20 @@ def get_entity(body, ident):
             return entity
 
 
-def merge(reference, localization, transforms):
+def merge(reference, localization, transforms, in_changeset):
     """Transform legacy translations into FTL.
 
     Use the `reference` FTL AST as a template.  For each en-US string in the
-    reference, check for an existing translation in the current FTL
+    reference, first check if it's in the currently processed changeset with
+    `in_changeset`; then check for an existing translation in the current FTL
     `localization` or for a migration specification in `transforms`.
     """
 
     def merge_entry(entry):
         ident = entry.id.name
+
+        if not in_changeset(ident):
+            return None
 
         existing = get_entity(localization.body, ident)
         if existing is not None:
@@ -89,6 +93,12 @@ class MergeContext(object):
         # transform operations: COPY, REPLACE, PLURALS, CONCAT, INTERPOLATE.
         self.transforms = {}
 
+        # Keep track of the current FTL message when building the transforms
+        # using MESSAGE.  Each subsequent use of SOURCE will add the source
+        # translation to the set of dependencies for this message.
+        self.current_message = None
+        self.dependencies = {}
+
     def read_ftl_resource(self, path):
         f = codecs.open(path, 'r', 'utf8')
         try:
@@ -126,13 +136,57 @@ class MergeContext(object):
         collection = {ent.get_key(): ent for ent in parser}
         self.legacy_resources[path] = collection
 
-    def add_transforms(self, path, transforms):
-        """Define transforms for `path`."""
-        self.transforms[path] = transforms
+    def add_transforms(self, transforms):
+        """Define transforms for resource paths.
+
+        Each transform is a (path, Node) tuple.
+        """
+        for path, node in transforms:
+            self.current_message = None
+            path_transforms = self.transforms.setdefault(path, [])
+            path_transforms.append(node)
+
+    def create_message(self):
+        """Create a MESSAGE partial which returns another partial.
+
+        Use the `MESSAGE` partial instead of `FTL.Entity`.  It will set the
+        context's internal state such that each subsequent use of SOURCE will
+        add the source translations as dependencies of the current message.
+
+        The `MESSAGE` partial returns a partial itself.  Call it to specify the
+        `value` and/or the `traits` transforms.
+
+            ctx.add_transforms([
+                MESSAGE('aboutDownloads.ftl', 'title')(
+                    value=COPY(
+                        SOURCE(
+                            'aboutDownloads.dtd',
+                            'aboutDownloads.title'
+                        )
+                    )
+                ),
+            ])
+        """
+        def message(path, key):
+            # Set the context's internal state for SOURCE to work correctly.
+            self.current_message = (path, key)
+            self.dependencies[self.current_message] = set()
+
+            def partial(value=None, traits=None):
+                # Return `path` for `add_transforms`.
+                return path, FTL.Entity(
+                    FTL.Identifier(key), value, traits
+                )
+            return partial
+        return message
 
     def create_source(self):
         """Create a SOURCE partial for use with other operations."""
         def source(path, key):
+            # Set this source as a dependency for the current message.
+            current_dependencies = self.dependencies[self.current_message]
+            current_dependencies.add((path, key))
+
             entity = self.legacy_resources[path].get(key, None)
             if entity is not None:
                 return entity.get_val()
@@ -141,22 +195,44 @@ class MergeContext(object):
     def create_plurals(self):
         """Create a PLURALS partial for use with other operations."""
         def plurals(source, selector, foreach):
+            # Use this context's plural categories as variant keys.
             return VARIANTS(source, selector, self.plural_categories, foreach)
         return plurals
 
-    def merge(self):
+    def merge(self, changeset=None):
         """Transform and merge context's input data.
 
         The input data must be configured earlier using the `add_*` methods.
+        if given, `changeset` must be a set of (path, key) tuples describing
+        which legacy translations are to be merged.
         """
+
+        if changeset is None:
+            # Merge all known legacy translations.
+            changeset = {
+                (path, key)
+                for path, strings in self.legacy_resources.iteritems()
+                for key in strings.iterkeys()
+            }
 
         result = {}
 
         for path, reference in self.reference_resources.iteritems():
+
+            def in_changeset(ident):
+                """Check if entity should be merged.
+
+                If at least one dependency of the entity is in the current
+                changeset, merge it.
+                """
+                message_deps = self.dependencies.get((path, ident), set())
+                # Take the intersection of dependencies and the changeset.
+                return message_deps & changeset
+
             current = self.current_resources.get(path, FTL.Resource())
             transforms = self.transforms.get(path, [])
 
-            merged = merge(reference, current, transforms)
+            merged = merge(reference, current, transforms, in_changeset)
             result[path] = self.ftl_serializer.serialize(merged.toJSON())
 
         return result
