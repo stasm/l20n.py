@@ -3,7 +3,7 @@
 import unittest
 
 from util import ftl
-from merge import MergeContext
+from context import MergeContext
 from operations import COPY
 
 
