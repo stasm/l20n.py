@@ -104,14 +104,15 @@ def VARIANTS(source, selector, keys, foreach):
     `foreach` function.  It should return an `FTL.Pattern`.
     """
     variants = source.split(';')
-    keys_iter = iter(keys)
+    keys_enum = enumerate(keys)
+    last_variant_index = len(variants) - 1
 
     def createMember(variant):
-        key = next(keys_iter)
+        index, key = next(keys_enum)
         return FTL.Member(
             FTL.Keyword(key),
             foreach(variant),
-            default=key == 'other'
+            default=index == last_variant_index
         )
 
     select = FTL.SelectExpression(
