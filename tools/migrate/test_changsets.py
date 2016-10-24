@@ -6,10 +6,10 @@ import l20n.format.ast as FTL
 
 from util import ftl
 from context import MergeContext
-from operations import COPY, REPLACE
+from operations import COPY, REPLACE, CONCAT, INTERPOLATE
 
 
-class TestMergeContext(unittest.TestCase):
+class TestMergeAboutDownloads(unittest.TestCase):
     def setUp(self):
         self.ctx = MergeContext(
             lang='pl',
@@ -257,7 +257,6 @@ class TestMergeContext(unittest.TestCase):
         )
 
     def test_merge_context_some_messages(self):
-
         changeset = {
             ('aboutDownloads.dtd', 'aboutDownloads.title'),
             ('aboutDownloads.dtd', 'aboutDownloads.header'),
@@ -277,6 +276,123 @@ class TestMergeContext(unittest.TestCase):
         download-state-canceled = Anulowane
             ''')
         }
+
+        self.assertDictEqual(
+            self.ctx.merge(changeset),
+            expected
+        )
+
+
+class TestMergeAboutDialog(unittest.TestCase):
+    def setUp(self):
+        self.ctx = MergeContext(
+            lang='pl',
+            reference_dir='fixtures/en-US',
+            localization_dir='fixtures/pl'
+        )
+
+        self.ctx.add_reference('aboutDialog.ftl')
+        self.ctx.add_legacy('aboutDialog.dtd')
+
+        MESSAGE = self.ctx.create_message()
+        SOURCE = self.ctx.create_source()
+
+        self.ctx.add_transforms([
+            MESSAGE('aboutDialog.ftl', 'update-failed')(
+                value=CONCAT(
+                    COPY(
+                        SOURCE('aboutDialog.dtd', 'update.failed.start'),
+                    ),
+                    COPY('<a>'),
+                    COPY(
+                        SOURCE('aboutDialog.dtd', 'update.failed.linkText'),
+                    ),
+                    COPY('</a>'),
+                    COPY(
+                        SOURCE('aboutDialog.dtd', 'update.failed.end'),
+                    ),
+                )
+            ),
+            MESSAGE('aboutDialog.ftl', 'channel-desc')(
+                value=CONCAT(
+                    COPY(
+                        SOURCE('aboutDialog.dtd', 'channel.description.start'),
+                    ),
+                    INTERPOLATE('channelname'),
+                    COPY(
+                        SOURCE('aboutDialog.dtd', 'channel.description.end'),
+                    )
+                )
+            ),
+            MESSAGE('aboutDialog.ftl', 'community')(
+                value=CONCAT(
+                    REPLACE(
+                        SOURCE('aboutDialog.dtd', 'community.start'),
+                        {
+                            '&brandShortName;': [
+                                FTL.ExternalArgument('brand-short-name')
+                            ]
+                        }
+                    ),
+                    COPY('<a>'),
+                    REPLACE(
+                        SOURCE('aboutDialog.dtd', 'community.mozillaLink'),
+                        {
+                            '&vendorShortName;': [
+                                FTL.ExternalArgument('vendor-short-name')
+                            ]
+                        }
+                    ),
+                    COPY('</a>'),
+                    COPY(
+                        SOURCE('aboutDialog.dtd', 'community.middle')
+                    ),
+                    COPY('<a>'),
+                    COPY(
+                        SOURCE('aboutDialog.dtd', 'community.creditsLink')
+                    ),
+                    COPY('</a>'),
+                    COPY(
+                        SOURCE('aboutDialog.dtd', 'community.end')
+                    )
+                )
+            ),
+        ])
+
+    def test_merge_context_all_messages(self):
+        expected = {
+            'aboutDialog.ftl': ftl('''
+        # This Source Code Form is subject to the terms of the Mozilla Public
+        # License, v. 2.0. If a copy of the MPL was not distributed with this
+        # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+        update-failed = Aktualizacja się nie powiodła. <a>Pobierz</a>.
+        channel-desc = "Obecnie korzystasz z kanału { $channelname }. "
+        community = Program { $brand-short-name } został opracowany przez <a>organizację { $vendor-short-name }</a>, która jest <a>globalną społecznością</a>, starającą się zapewnić, by…
+            ''')
+        }
+
+        self.assertDictEqual(
+            self.ctx.merge(),
+            expected
+        )
+
+    def test_merge_context_some_messages(self):
+        changeset = {
+            ('aboutDialog.dtd', 'update.failed.start'),
+        }
+
+        expected = {
+            'aboutDialog.ftl': ftl('''
+        # This Source Code Form is subject to the terms of the Mozilla Public
+        # License, v. 2.0. If a copy of the MPL was not distributed with this
+        # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+        update-failed = Aktualizacja się nie powiodła. <a>Pobierz</a>.
+            ''')
+        }
+
+        self.maxDiff = None
 
         self.assertDictEqual(
             self.ctx.merge(changeset),
