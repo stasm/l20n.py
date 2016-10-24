@@ -20,7 +20,7 @@ def get_entity(body, ident):
             return entity
 
 
-def merge(reference, localization, legacy, transforms):
+def merge(reference, localization, transforms):
     """Transform legacy translations into FTL.
 
     Use the `reference` FTL AST as a template.  For each en-US string in the
@@ -144,16 +144,11 @@ class MergeContext(object):
             return VARIANTS(source, selector, self.plural_categories, foreach)
         return plurals
 
-    def merge(self, changeset):
+    def merge(self):
         """Transform and merge context's input data.
 
         The input data must be configured earlier using the `add_*` methods.
-        The `changeset` argument is a dict of (file path, list of keys)
-        describing which legacy traslations should be transformed.
         """
-
-        # XXX Filter legacy_resources according to changeset.
-        changed = self.legacy_resources
 
         result = {}
 
@@ -161,7 +156,7 @@ class MergeContext(object):
             current = self.current_resources.get(path, FTL.Resource())
             transforms = self.transforms.get(path, [])
 
-            merged = merge(reference, current, changed, transforms)
+            merged = merge(reference, current, transforms)
             result[path] = self.ftl_serializer.serialize(merged.toJSON())
 
         return result

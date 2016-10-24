@@ -56,6 +56,6 @@ class TestMergeContext(unittest.TestCase):
         }
 
         self.assertDictEqual(
-            self.ctx.merge(None),
+            self.ctx.merge(),
             expected
         )
