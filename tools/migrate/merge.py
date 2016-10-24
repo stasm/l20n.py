@@ -19,7 +19,23 @@ def merge(reference, localization, transforms, in_changeset):
     `localization` or for a migration specification in `transforms`.
     """
 
+    def merge_body(body):
+        return [
+            entry for entry in map(merge_entry, body)
+            if entry is not None
+        ]
+
     def merge_entry(entry):
+        if isinstance(entry, FTL.Comment):
+            return entry
+
+        if isinstance(entry, FTL.Section):
+            return FTL.Section(
+                key=entry.key,
+                body=merge_body(entry.body),
+                comment=entry.comment
+            )
+
         ident = entry.id.name
 
         if not in_changeset(ident):
@@ -31,11 +47,8 @@ def merge(reference, localization, transforms, in_changeset):
 
         transform = get_entity(transforms, ident)
         if transform is not None:
+            if transform.comment is None:
+                transform.comment = entry.comment
             return transform
 
-    body = [
-        entry for entry in map(merge_entry, reference.body)
-        if entry is not None
-    ]
-
-    return FTL.Resource(body, reference.comment)
+    return FTL.Resource(merge_body(reference.body), reference.comment)
