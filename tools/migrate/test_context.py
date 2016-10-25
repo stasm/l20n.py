@@ -2,7 +2,7 @@
 
 import unittest
 
-from util import ftl
+from util import ftl, map_serialize
 from context import MergeContext
 from operations import COPY
 
@@ -45,6 +45,6 @@ class TestMergeContext(unittest.TestCase):
         }
 
         self.assertDictEqual(
-            self.ctx.merge(),
+            map_serialize(self.ctx.merge_changeset()),
             expected
         )

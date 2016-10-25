@@ -162,7 +162,7 @@ class MergeContext(object):
             return VARIANTS(source, selector, self.plural_categories, foreach)
         return plurals
 
-    def merge(self, changeset=None):
+    def merge_changeset(self, changeset=None):
         """Transform and merge context's input data.
 
         The input data must be configured earlier using the `add_*` methods.
@@ -195,7 +195,7 @@ class MergeContext(object):
             current = self.current_resources.get(path, FTL.Resource())
             transforms = self.transforms.get(path, [])
 
-            merged = merge(reference, current, transforms, in_changeset)
-            result[path] = self.ftl_serializer.serialize(merged.toJSON())
+            # Store the complete `FTL.Resource` as the result.
+            result[path] = merge(reference, current, transforms, in_changeset)
 
         return result

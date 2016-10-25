@@ -4,7 +4,7 @@ import unittest
 
 import l20n.format.ast as FTL
 
-from util import ftl
+from util import ftl, map_serialize
 from context import MergeContext
 from operations import COPY, REPLACE, CONCAT, INTERPOLATE
 
@@ -252,7 +252,7 @@ class TestMergeAboutDownloads(unittest.TestCase):
         }
 
         self.assertDictEqual(
-            self.ctx.merge(),
+            map_serialize(self.ctx.merge_changeset()),
             expected
         )
 
@@ -278,7 +278,7 @@ class TestMergeAboutDownloads(unittest.TestCase):
         }
 
         self.assertDictEqual(
-            self.ctx.merge(changeset),
+            map_serialize(self.ctx.merge_changeset(changeset)),
             expected
         )
 
@@ -373,7 +373,7 @@ class TestMergeAboutDialog(unittest.TestCase):
         }
 
         self.assertDictEqual(
-            self.ctx.merge(),
+            map_serialize(self.ctx.merge_changeset()),
             expected
         )
 
@@ -395,6 +395,6 @@ class TestMergeAboutDialog(unittest.TestCase):
         self.maxDiff = None
 
         self.assertDictEqual(
-            self.ctx.merge(changeset),
+            map_serialize(self.ctx.merge_changeset(changeset)),
             expected
         )

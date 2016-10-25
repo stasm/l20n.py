@@ -51,3 +51,10 @@ def ftl(code):
         code += '\n'
 
     return code
+
+
+def map_serialize(merged):
+    return {
+        path: ftl_serializer.serialize(resource.toJSON())
+        for path, resource in merged.iteritems()
+    }
