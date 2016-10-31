@@ -5,7 +5,7 @@ import unittest
 import l20n.format.ast as FTL
 from l20n.format.parser import FTLParser
 from compare_locales.parser import PropertiesParser, DTDParser
-from util import parse, serialize, ftl
+from util import parse, ftl, ftl_resource_to_json
 
 from merge import merge
 from operations import COPY
@@ -81,11 +81,13 @@ class TestMergeMessages(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(resource),
-            ftl('''
+            resource.toJSON(),
+            ftl_resource_to_json('''
                 title = Pobrane pliki
+
                 open-menuitem =
-                  [html/label] Otwórz
+                    [html/label] Otwórz
+
                 download-state-downloading = Pobieranie…
             ''')
         )
@@ -123,12 +125,14 @@ class TestMergeMessages(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(resource),
-            ftl('''
+            resource.toJSON(),
+            ftl_resource_to_json('''
                 title = Pobrane pliki
                 empty = Brak pobranych plików
+
                 open-menuitem =
-                  [html/label] Otwórz
+                    [html/label] Otwórz
+
                 download-state-downloading = Pobieranie…
             ''')
         )
@@ -209,22 +213,20 @@ class TestMergeAllEntries(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(resource),
-            ftl('''
+            resource.toJSON(),
+            ftl_resource_to_json('''
                 # This Source Code Form is subject to the terms of …
 
                 # A generic comment.
 
                 title = Pobrane pliki
 
-
                 # A section comment.
                 [[ Menu items ]]
 
-
                 # A message comment.
                 open-menuitem =
-                  [html/label] Otwórz
+                    [html/label] Otwórz
                 download-state-downloading = Pobieranie…
 
             ''')
@@ -263,8 +265,8 @@ class TestMergeAllEntries(unittest.TestCase):
         )
 
         self.assertEqual(
-            serialize(resource),
-            ftl('''
+            resource.toJSON(),
+            ftl_resource_to_json('''
                 # This Source Code Form is subject to the terms of …
 
                 # A generic comment.
@@ -272,14 +274,13 @@ class TestMergeAllEntries(unittest.TestCase):
                 title = Pobrane pliki
                 empty = Brak pobranych plików
 
-
                 # A section comment.
                 [[ Menu items ]]
 
-
                 # A message comment.
                 open-menuitem =
-                  [html/label] Otwórz
+                    [html/label] Otwórz
+
                 download-state-downloading = Pobieranie…
 
             ''')

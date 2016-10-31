@@ -4,7 +4,7 @@ import unittest
 
 import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser, DTDParser
-from util import parse, dumpEntry, ftl
+from util import parse, ftl_message_to_json
 
 from operations import COPY
 
@@ -34,8 +34,8 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 foo = Foo
             ''')
         )
@@ -49,8 +49,8 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 foo-unicode-middle = Foo Bar
             ''')
         )
@@ -64,8 +64,8 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 foo-unicode-begin = " Foo"
             ''')
         )
@@ -79,8 +79,8 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 foo-unicode-end = "Foo "
             ''')
         )
@@ -94,8 +94,8 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 foo-html-entity = &lt;&#x21E7;&#x2318;K&gt;
             ''')
         )
@@ -128,8 +128,8 @@ class TestCopyTraits(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 check-for-updates =
                   [xul/label] Check for updates
                   [xul/accesskey] C

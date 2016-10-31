@@ -11,7 +11,7 @@ ftl_serializer = FTLSerializer()
 
 def parse(Parser, string):
     if Parser is FTLParser:
-        ast, errors = ftl_parser.parse(string)
+        ast, errors = ftl_parser.parse(string, with_source=False)
         return ast
 
     # Parsing a legacy resource.
@@ -23,14 +23,6 @@ def parse(Parser, string):
     return {ent.get_key(): ent for ent in parser}
 
 
-def dumpEntry(node):
-    return ftl_serializer.dumpEntry(node.toJSON())
-
-
-def serialize(resource):
-    return ftl_serializer.serialize(resource.toJSON())
-
-
 def ftl(code):
     """Nicer indentation for FTL code.
 
@@ -39,22 +31,27 @@ def ftl(code):
     end with a newline to match the output of the serializer.
     """
 
-    # The FTL Serializer returns Unicode data.
+    # The FTL Serializer returns Unicode data so we use it as the baseline.
     code = code.decode('utf8')
 
     # The code might be triple-quoted.
-    code = textwrap.dedent(code.lstrip('\n'))
+    code = code.lstrip('\n')
 
-    # The FTL Serializer always appends EOL to serialized entries. The FTL code
-    # that we want to compare against the serializer's output should too.
-    if not code.endswith('\n'):
-        code += '\n'
-
-    return code
+    return textwrap.dedent(code)
 
 
-def map_serialize(merged):
+def ftl_resource_to_json(code):
+    ast, errors = ftl_parser.parseResource(ftl(code), with_source=False)
+    return ast
+
+
+def ftl_message_to_json(code):
+    ast, errors = ftl_parser.parse(ftl(code), with_source=False)
+    return ast.body[0].toJSON()
+
+
+def to_json(merged):
     return {
-        path: ftl_serializer.serialize(resource.toJSON())
+        path: resource.toJSON()
         for path, resource in merged.iteritems()
     }

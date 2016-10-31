@@ -4,7 +4,7 @@ import unittest
 
 import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser
-from util import parse, dumpEntry, ftl
+from util import parse, ftl_message_to_json
 
 from operations import REPLACE
 
@@ -25,99 +25,99 @@ class TestReplace(unittest.TestCase):
 
     def test_replace_one(self):
         msg = FTL.Entity(
-            FTL.Identifier('hello'),
+            FTL.Identifier(u'hello'),
             value=REPLACE(
                 SOURCE(self.strings, 'hello'),
-                {'#1': [FTL.ExternalArgument('username')]}
+                {'#1': [FTL.ExternalArgument(u'username')]}
             )
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 hello = Hello, { $username }!
             ''')
         )
 
     def test_replace_two(self):
         msg = FTL.Entity(
-            FTL.Identifier('welcome'),
+            FTL.Identifier(u'welcome'),
             value=REPLACE(
                 SOURCE(self.strings, 'welcome'),
-                {'#1': [FTL.ExternalArgument('username')],
-                 '#2': [FTL.ExternalArgument('appname')]}
+                {'#1': [FTL.ExternalArgument(u'username')],
+                 '#2': [FTL.ExternalArgument(u'appname')]}
             )
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 welcome = Welcome, { $username }, to { $appname }!
             ''')
         )
 
     def test_replace_too_many(self):
         msg = FTL.Entity(
-            FTL.Identifier('welcome'),
+            FTL.Identifier(u'welcome'),
             value=REPLACE(
                 SOURCE(self.strings, 'welcome'),
-                {'#1': [FTL.ExternalArgument('username')],
-                 '#2': [FTL.ExternalArgument('appname')],
-                 '#3': [FTL.ExternalArgument('extraname')]}
+                {'#1': [FTL.ExternalArgument(u'username')],
+                 '#2': [FTL.ExternalArgument(u'appname')],
+                 '#3': [FTL.ExternalArgument(u'extraname')]}
             )
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 welcome = Welcome, { $username }, to { $appname }!
             ''')
         )
 
     def test_replace_too_few(self):
         msg = FTL.Entity(
-            FTL.Identifier('welcome'),
+            FTL.Identifier(u'welcome'),
             value=REPLACE(
                 SOURCE(self.strings, 'welcome'),
-                {'#1': [FTL.ExternalArgument('username')]}
+                {'#1': [FTL.ExternalArgument(u'username')]}
             )
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 welcome = Welcome, { $username }, to #2!
             ''')
         )
 
     def test_replace_first(self):
         msg = FTL.Entity(
-            FTL.Identifier('first'),
+            FTL.Identifier(u'first'),
             value=REPLACE(
                 SOURCE(self.strings, 'first'),
-                {'#1': [FTL.ExternalArgument('foo')]}
+                {'#1': [FTL.ExternalArgument(u'foo')]}
             )
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 first = { $foo } Bar
             ''')
         )
 
     def test_replace_last(self):
         msg = FTL.Entity(
-            FTL.Identifier('last'),
+            FTL.Identifier(u'last'),
             value=REPLACE(
                 SOURCE(self.strings, 'last'),
-                {'#1': [FTL.ExternalArgument('bar')]}
+                {'#1': [FTL.ExternalArgument(u'bar')]}
             )
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 last = Foo { $bar }
             ''')
         )

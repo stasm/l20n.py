@@ -4,7 +4,7 @@ import unittest
 
 import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser
-from util import parse, dumpEntry, ftl
+from util import parse, ftl_message_to_json
 
 from operations import COPY, REPLACE, VARIANTS
 
@@ -36,11 +36,11 @@ class TestPlural(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 delete-all = { $num ->
-                  [one] Delete this download?
-                 *[other] Delete all downloads?
+                    [one] Delete this download?
+                   *[other] Delete all downloads?
                 }
             ''')
         )
@@ -66,11 +66,11 @@ class TestPluralReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 delete-all = { $num ->
-                  [one] Delete this download?
-                 *[other] Delete { $num } downloads?
+                    [one] Delete this download?
+                   *[other] Delete { $num } downloads?
                 }
             ''')
         )

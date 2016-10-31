@@ -2,7 +2,7 @@
 
 import unittest
 
-from util import ftl, map_serialize
+from util import ftl_resource_to_json, to_json
 from context import MergeContext
 from operations import COPY
 
@@ -35,7 +35,7 @@ class TestMergeContext(unittest.TestCase):
         ])
 
         expected = {
-            'aboutDownloads.ftl': ftl('''
+            'aboutDownloads.ftl': ftl_resource_to_json('''
         # This Source Code Form is subject to the terms of the Mozilla Public
         # License, v. 2.0. If a copy of the MPL was not distributed with this
         # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -45,6 +45,6 @@ class TestMergeContext(unittest.TestCase):
         }
 
         self.assertDictEqual(
-            map_serialize(self.ctx.merge_changeset()),
+            to_json(self.ctx.merge_changeset()),
             expected
         )

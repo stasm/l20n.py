@@ -73,21 +73,25 @@ def REPLACE(source, repls):
         """
         parts, rest = acc
         before, sep, after = rest.value.partition(cur)
-        text_before = FTL.TextElement(before)
-        placeable = FTL.Placeable(repls[sep])
-        text_after = FTL.TextElement(after)
 
         # Return the elements found and converted so far, and the remaining
         # text which hasn't been scanned for placeables yet.
-        return parts + [text_before, placeable], text_after
+        return (
+            parts + [FTL.TextElement(before), FTL.Placeable(repls[sep])],
+            FTL.TextElement(after)
+        )
 
-    # Start with an empty list of elements and the original translation. It's
-    # wrapped in `FTL.TextElement` here to transparently work with `replace`.
+    def is_non_empty(elem):
+        """Used for filtering empty `FTL.TextElement` nodes out."""
+        return not isinstance(elem, FTL.TextElement) or len(elem.value)
+
+    # Start with an empty list of elements and the original translation.
     init = ([], FTL.TextElement(source))
     parts, tail = reduce(replace, keys_in_order, init)
-    # We need to explicitly concat the trailing text to get the full list of
-    # elements.
-    elements = parts + [tail]
+
+    # Explicitly concat the trailing part to get the full list of elements and
+    # filter out the empty ones.
+    elements = filter(is_non_empty, parts + [tail])
 
     return FTL.Pattern(
         None,

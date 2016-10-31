@@ -4,7 +4,7 @@ import unittest
 
 import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser, DTDParser
-from util import parse, dumpEntry, ftl
+from util import parse, ftl_message_to_json
 
 from operations import COPY, INTERPOLATE, REPLACE, CONCAT
 
@@ -37,8 +37,8 @@ class TestConcatCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 hello = Hello, world!
             ''')
         )
@@ -73,8 +73,8 @@ class TestConcatCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 hello = Hello, world!
             ''')
         )
@@ -93,8 +93,8 @@ class TestConcatCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 hello = " Hello, world!"
             ''')
         )
@@ -113,8 +113,8 @@ class TestConcatCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 hello = "Hello, world! "
             ''')
         )
@@ -147,8 +147,8 @@ class TestConcatLiteral(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 update-failed = Update failed. <a>Download manually</a>!
             ''')
         )
@@ -176,8 +176,8 @@ class TestConcatInterpolate(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('''
+            msg.toJSON(),
+            ftl_message_to_json('''
                 channel-desc = "You are on the { $channelname } channel. "
             ''')
         )
@@ -230,10 +230,12 @@ class TestConcatReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            dumpEntry(msg),
-            ftl('community = { $brand-short-name } is designed by '
+            msg.toJSON(),
+            ftl_message_to_json(
+                'community = { $brand-short-name } is designed by '
                 '<a>{ $vendor-short-name }</a>, a <a>global community</a> '
-                'working together to…')
+                'working together to…'
+            )
         )
 
 

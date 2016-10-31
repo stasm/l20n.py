@@ -4,7 +4,7 @@ import unittest
 
 import l20n.format.ast as FTL
 
-from util import ftl, map_serialize
+from util import ftl_resource_to_json, to_json
 from context import MergeContext
 from operations import COPY, REPLACE, CONCAT, INTERPOLATE
 
@@ -214,45 +214,48 @@ class TestMergeAboutDownloads(unittest.TestCase):
 
     def test_merge_context_all_messages(self):
         expected = {
-            'aboutDownloads.ftl': ftl('''
+            'aboutDownloads.ftl': ftl_resource_to_json('''
         # This Source Code Form is subject to the terms of the Mozilla Public
         # License, v. 2.0. If a copy of the MPL was not distributed with this
         # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-        title = Pobrane pliki
+        title  = Pobrane pliki
         header = Twoje pobrane pliki
-        empty = Brak pobranych plików
+        empty  = Brak pobranych plików
+
         open-menuitem =
-          [html/label] Otwórz
+            [html/label] Otwórz
         retry-menuitem =
-          [html/label] Spróbuj ponownie
+            [html/label] Spróbuj ponownie
         remove-menuitem =
-          [html/label] Usuń
+            [html/label] Usuń
         pause-menuitem =
-          [html/label] Wstrzymaj
+            [html/label] Wstrzymaj
         resume-menuitem =
-          [html/label] Wznów
+            [html/label] Wznów
         cancel-menuitem =
-          [html/label] Anuluj
+            [html/label] Anuluj
         remove-all-menuitem =
-          [html/label] Usuń wszystko
-        delete-all-title = Usuń wszystko
+            [html/label] Usuń wszystko
+
+        delete-all-title   = Usuń wszystko
         delete-all-message = { $num ->
-          [one] Usunąć pobrany plik?
-          [few] Usunąć { $num } pobrane pliki?
-         *[many] Usunąć { $num } pobranych plików?
+            [one] Usunąć pobrany plik?
+            [few] Usunąć { $num } pobrane pliki?
+           *[many] Usunąć { $num } pobranych plików?
         }
+
         download-state-downloading = Pobieranie…
-        download-state-canceled = Anulowane
-        download-state-failed = Nieudane
-        download-state-paused = Wstrzymane
-        download-state-starting = Rozpoczynanie…
-        download-size-unknown = Nieznany rozmiar
+        download-state-canceled    = Anulowane
+        download-state-failed      = Nieudane
+        download-state-paused      = Wstrzymane
+        download-state-starting    = Rozpoczynanie…
+        download-size-unknown      = Nieznany rozmiar
             ''')
         }
 
         self.assertDictEqual(
-            map_serialize(self.ctx.merge_changeset()),
+            to_json(self.ctx.merge_changeset()),
             expected
         )
 
@@ -265,20 +268,20 @@ class TestMergeAboutDownloads(unittest.TestCase):
         }
 
         expected = {
-            'aboutDownloads.ftl': ftl('''
+            'aboutDownloads.ftl': ftl_resource_to_json('''
         # This Source Code Form is subject to the terms of the Mozilla Public
         # License, v. 2.0. If a copy of the MPL was not distributed with this
         # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-        title = Pobrane pliki
-        header = Twoje pobrane pliki
+        title                      = Pobrane pliki
+        header                     = Twoje pobrane pliki
         download-state-downloading = Pobieranie…
-        download-state-canceled = Anulowane
+        download-state-canceled    = Anulowane
             ''')
         }
 
         self.assertDictEqual(
-            map_serialize(self.ctx.merge_changeset(changeset)),
+            to_json(self.ctx.merge_changeset(changeset)),
             expected
         )
 
@@ -361,19 +364,19 @@ class TestMergeAboutDialog(unittest.TestCase):
 
     def test_merge_context_all_messages(self):
         expected = {
-            'aboutDialog.ftl': ftl('''
+            'aboutDialog.ftl': ftl_resource_to_json('''
         # This Source Code Form is subject to the terms of the Mozilla Public
         # License, v. 2.0. If a copy of the MPL was not distributed with this
         # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
         update-failed = Aktualizacja się nie powiodła. <a>Pobierz</a>.
-        channel-desc = "Obecnie korzystasz z kanału { $channelname }. "
-        community = Program { $brand-short-name } został opracowany przez <a>organizację { $vendor-short-name }</a>, która jest <a>globalną społecznością</a>, starającą się zapewnić, by…
+        channel-desc  = "Obecnie korzystasz z kanału { $channelname }. "
+        community     = Program { $brand-short-name } został opracowany przez <a>organizację { $vendor-short-name }</a>, która jest <a>globalną społecznością</a>, starającą się zapewnić, by…
             ''')
         }
 
         self.assertDictEqual(
-            map_serialize(self.ctx.merge_changeset()),
+            to_json(self.ctx.merge_changeset()),
             expected
         )
 
@@ -383,7 +386,7 @@ class TestMergeAboutDialog(unittest.TestCase):
         }
 
         expected = {
-            'aboutDialog.ftl': ftl('''
+            'aboutDialog.ftl': ftl_resource_to_json('''
         # This Source Code Form is subject to the terms of the Mozilla Public
         # License, v. 2.0. If a copy of the MPL was not distributed with this
         # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -395,6 +398,6 @@ class TestMergeAboutDialog(unittest.TestCase):
         self.maxDiff = None
 
         self.assertDictEqual(
-            map_serialize(self.ctx.merge_changeset(changeset)),
+            to_json(self.ctx.merge_changeset(changeset)),
             expected
         )
