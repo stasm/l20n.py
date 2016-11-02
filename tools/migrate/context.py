@@ -195,7 +195,18 @@ class MergeContext(object):
             current = self.current_resources.get(path, FTL.Resource())
             transforms = self.transforms.get(path, [])
 
-            # Store the complete `FTL.Resource` as the result.
+            # The result for this path is a complete `FTL.Resource`.
             result[path] = merge(reference, current, transforms, in_changeset)
 
         return result
+
+    def merge_changesets(self, changesets):
+        for changeset in changesets:
+            merged = self.merge_changeset(changeset)
+
+            # Store the merged resources on the context so that the next merge
+            # already takes it into account as the existing localization.
+            for path, resource in merged.iteritems():
+                self.current_resources[path] = resource
+
+            yield merged

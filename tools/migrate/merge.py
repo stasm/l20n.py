@@ -38,12 +38,17 @@ def merge(reference, localization, transforms, in_changeset):
 
         ident = entry.id.name
 
-        if not in_changeset(ident):
-            return None
-
+        # If the message is present in the existing localization, we add it to
+        # the resulting resource.  This ensures consecutive merges don't remove
+        # translations but rather create supersets of them.
         existing = get_entity(localization.body, ident)
         if existing is not None:
             return existing
+
+        # If the message doesn't exist if the localization yet, make sure it's
+        # supposed to be added as part of this merger.
+        if not in_changeset(ident):
+            return None
 
         transform = get_entity(transforms, ident)
         if transform is not None:
