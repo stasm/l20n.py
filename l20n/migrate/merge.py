@@ -21,7 +21,8 @@ def merge(reference, localization, transforms, in_changeset):
 
     def merge_body(body):
         return [
-            entry for entry in map(merge_entry, body)
+            entry
+            for entry in map(merge_entry, body)
             if entry is not None
         ]
 
@@ -56,4 +57,5 @@ def merge(reference, localization, transforms, in_changeset):
                 transform.comment = entry.comment
             return transform
 
-    return FTL.Resource(merge_body(reference.body), reference.comment)
+    body = merge_body(reference.body)
+    return FTL.Resource(body, reference.comment)

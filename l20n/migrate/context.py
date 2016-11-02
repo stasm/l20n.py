@@ -197,25 +197,32 @@ class MergeContext(object):
             current = self.current_resources.get(path, FTL.Resource())
             transforms = self.transforms.get(path, [])
 
-            # Merge legacy translations with existing ones using the reference
-            # as a template.
-            resource = merge(reference, current, transforms, in_changeset)
+            # Merge legacy translations with the existing ones using the
+            # reference as a template.
+            snapshot = merge(reference, current, transforms, in_changeset)
 
-            # Store the merged resource on the context so that the next merge
+            # If none of the transforms is in the given changeset, the merged
+            # snapshot is identical to the current translation. We compare
+            # JSON trees rather then use filtering by `in_changeset` to account
+            # for translations removed from `reference`.
+            if snapshot.toJSON() == current.toJSON():
+                continue
+
+            # Store the merged snapshot on the context so that the next merge
             # already takes it into account as the existing localization.
-            self.current_resources[path] = resource
+            self.current_resources[path] = snapshot
 
             # The result for this path is a complete `FTL.Resource`.
-            yield path, resource
+            yield path, snapshot
 
     def serialize_changeset(self, changeset):
         """Return a dict of serialized FTLs for the changeset.
 
         Given `changeset`, return a dict whose keys are resource paths and
-        values are serialized FTL resources.
+        values are serialized FTL snapshots.
         """
 
         return {
-            path: self.ftl_serializer.serialize(resource.toJSON())
-            for path, resource in self.merge_changeset(changeset)
+            path: self.ftl_serializer.serialize(snapshot.toJSON())
+            for path, snapshot in self.merge_changeset(changeset)
         }
