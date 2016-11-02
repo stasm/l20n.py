@@ -1,23 +1,17 @@
 # coding=utf8
 
-import codecs
+import pkgutil
 import json
-import os
 
-
-def path(*args):
-    return os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        *args
-    )
+pkgutil.get_data
 
 
 def in_canonical_order(a, b):
     return canonical_order.index(a) - canonical_order.index(b)
 
 
-cldr_plurals = json.load(
-    codecs.open(path('cldr_data', 'plurals.json'), 'r', 'utf8')
+cldr_plurals = json.loads(
+    pkgutil.get_data('l20n.migrate', 'cldr_data/plurals.json')
 )
 
 rules = cldr_plurals['supplemental']['plurals-type-cardinal']
