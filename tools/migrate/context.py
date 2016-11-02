@@ -201,6 +201,13 @@ class MergeContext(object):
         return result
 
     def merge_changesets(self, changesets):
+        """Return a generator yielding FTL ASTs per changeset.
+
+        For each changeset in `changesets`, yield a dict whose keys are
+        resource paths and values are `FTL.Resource` instances.  The values
+        will also be used to update this context's existing localization
+        resources.
+        """
         for changeset in changesets:
             merged = self.merge_changeset(changeset)
 
@@ -210,3 +217,15 @@ class MergeContext(object):
                 self.current_resources[path] = resource
 
             yield merged
+
+    def serialize_changesets(self, changesets):
+        """Return a generator yielding serialized FTLs per changeset.
+
+        For each changeset in `changesets`, yield a dict whose keys are
+        resource paths and values are serialized FTL resources.
+        """
+        for merged in self.merge_changesets(changesets):
+            yield {
+                path: self.ftl_serializer.serialize(resource.toJSON())
+                for path, resource in merged.iteritems()
+            }

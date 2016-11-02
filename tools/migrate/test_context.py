@@ -2,7 +2,7 @@
 
 import unittest
 
-from util import ftl_resource_to_json, to_json
+from util import ftl, ftl_resource_to_json, to_json
 from context import MergeContext
 from operations import COPY
 
@@ -151,3 +151,60 @@ class TestMergeContext(unittest.TestCase):
             map(to_json, merged),
             [expected_a, expected_b]
         )
+
+    def test_serialize_changesets(self):
+        MESSAGE = self.ctx.create_message()
+        SOURCE = self.ctx.create_source()
+
+        self.ctx.add_transforms([
+            MESSAGE('aboutDownloads.ftl', 'title')(
+                value=COPY(
+                    SOURCE(
+                        'aboutDownloads.dtd',
+                        'aboutDownloads.title'
+                    )
+                )
+            ),
+            MESSAGE('aboutDownloads.ftl', 'header')(
+                value=COPY(
+                    SOURCE(
+                        'aboutDownloads.dtd',
+                        'aboutDownloads.header'
+                    )
+                )
+            ),
+        ])
+
+        changesets = [
+            {
+                ('aboutDownloads.dtd', 'aboutDownloads.title'),
+            },
+            {
+                ('aboutDownloads.dtd', 'aboutDownloads.header')
+            }
+        ]
+
+        expected = iter([
+            {
+                'aboutDownloads.ftl': ftl('''
+        # This Source Code Form is subject to the terms of the Mozilla Public
+        # License, v. 2.0. If a copy of the MPL was not distributed with this
+        # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+        title = Pobrane pliki
+                ''')
+            },
+            {
+                'aboutDownloads.ftl': ftl('''
+        # This Source Code Form is subject to the terms of the Mozilla Public
+        # License, v. 2.0. If a copy of the MPL was not distributed with this
+        # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+        title = Pobrane pliki
+        header = Twoje pobrane pliki
+                ''')
+            }
+        ])
+
+        for serialized in self.ctx.serialize_changesets(changesets):
+            self.assertEqual(serialized, next(expected))
