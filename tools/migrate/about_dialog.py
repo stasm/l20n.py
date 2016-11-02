@@ -6,7 +6,7 @@ from l20n.migrate import CONCAT, COPY, INTERPOLATE, REPLACE
 
 def migrate(ctx):
     ctx.add_reference('aboutDialog.ftl')
-    ctx.add_legacy('aboutDialog.dtd')
+    ctx.add_legacy('browser/chrome/browser/aboutDialog.dtd')
 
     MESSAGE = ctx.create_message()
     SOURCE = ctx.create_source()
@@ -15,33 +15,33 @@ def migrate(ctx):
         MESSAGE('aboutDialog.ftl', 'update-failed')(
             value=CONCAT(
                 COPY(
-                    SOURCE('aboutDialog.dtd', 'update.failed.start'),
+                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'update.failed.start'),
                 ),
                 COPY('<a>'),
                 COPY(
-                    SOURCE('aboutDialog.dtd', 'update.failed.linkText'),
+                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'update.failed.linkText'),
                 ),
                 COPY('</a>'),
                 COPY(
-                    SOURCE('aboutDialog.dtd', 'update.failed.end'),
+                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'update.failed.end'),
                 ),
             )
         ),
         MESSAGE('aboutDialog.ftl', 'channel-desc')(
             value=CONCAT(
                 COPY(
-                    SOURCE('aboutDialog.dtd', 'channel.description.start'),
+                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'channel.description.start'),
                 ),
                 INTERPOLATE('channelname'),
                 COPY(
-                    SOURCE('aboutDialog.dtd', 'channel.description.end'),
+                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'channel.description.end'),
                 )
             )
         ),
         MESSAGE('aboutDialog.ftl', 'community')(
             value=CONCAT(
                 REPLACE(
-                    SOURCE('aboutDialog.dtd', 'community.start'),
+                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'community.start2'),
                     {
                         '&brandShortName;': [
                             FTL.ExternalArgument('brand-short-name')
@@ -50,7 +50,7 @@ def migrate(ctx):
                 ),
                 COPY('<a>'),
                 REPLACE(
-                    SOURCE('aboutDialog.dtd', 'community.mozillaLink'),
+                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'community.mozillaLink'),
                     {
                         '&vendorShortName;': [
                             FTL.ExternalArgument('vendor-short-name')
@@ -59,15 +59,15 @@ def migrate(ctx):
                 ),
                 COPY('</a>'),
                 COPY(
-                    SOURCE('aboutDialog.dtd', 'community.middle')
+                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'community.middle2')
                 ),
                 COPY('<a>'),
                 COPY(
-                    SOURCE('aboutDialog.dtd', 'community.creditsLink')
+                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'community.creditsLink')
                 ),
                 COPY('</a>'),
                 COPY(
-                    SOURCE('aboutDialog.dtd', 'community.end')
+                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'community.end3')
                 )
             )
         ),
