@@ -50,8 +50,8 @@ def ftl_message_to_json(code):
     return ast.body[0].toJSON()
 
 
-def to_json(merged):
+def to_json(merged_iter):
     return {
         path: resource.toJSON()
-        for path, resource in merged.iteritems()
+        for path, resource in merged_iter
     }

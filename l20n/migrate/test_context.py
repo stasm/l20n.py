@@ -49,7 +49,7 @@ class TestMergeContext(unittest.TestCase):
             expected
         )
 
-    def test_merge_single_changeset(self):
+    def test_merge_one_changeset(self):
         MESSAGE = self.ctx.create_message()
         SOURCE = self.ctx.create_source()
 
@@ -145,14 +145,13 @@ class TestMergeContext(unittest.TestCase):
             ''')
         }
 
-        merged = self.ctx.merge_changesets((changeset_a, changeset_b))
+        merged_a = to_json(self.ctx.merge_changeset(changeset_a))
+        self.assertDictEqual(merged_a, expected_a)
 
-        self.assertListEqual(
-            map(to_json, merged),
-            [expected_a, expected_b]
-        )
+        merged_b = to_json(self.ctx.merge_changeset(changeset_b))
+        self.assertDictEqual(merged_b, expected_b)
 
-    def test_serialize_changesets(self):
+    def test_serialize_changeset(self):
         MESSAGE = self.ctx.create_message()
         SOURCE = self.ctx.create_source()
 
@@ -206,5 +205,6 @@ class TestMergeContext(unittest.TestCase):
             }
         ])
 
-        for serialized in self.ctx.serialize_changesets(changesets):
+        for changeset in changesets:
+            serialized = self.ctx.serialize_changeset(changeset)
             self.assertEqual(serialized, next(expected))

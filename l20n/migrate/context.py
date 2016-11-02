@@ -163,11 +163,15 @@ class MergeContext(object):
         return plurals
 
     def merge_changeset(self, changeset=None):
-        """Transform and merge context's input data.
+        """Return a generator of FTL ASTs for the changeset.
 
         The input data must be configured earlier using the `add_*` methods.
         if given, `changeset` must be a set of (path, key) tuples describing
         which legacy translations are to be merged.
+
+        Given `changeset`, return a dict whose keys are resource paths and
+        values are `FTL.Resource` instances.  The values will also be used to
+        update this context's existing localization resources.
         """
 
         if changeset is None:
@@ -178,15 +182,13 @@ class MergeContext(object):
                 for key in strings.iterkeys()
             }
 
-        result = {}
-
         for path, reference in self.reference_resources.iteritems():
 
             def in_changeset(ident):
                 """Check if entity should be merged.
 
                 If at least one dependency of the entity is in the current
-                changeset, merge it.
+                set of changeset, merge it.
                 """
                 message_deps = self.dependencies.get((path, ident), set())
                 # Take the intersection of dependencies and the changeset.
@@ -195,37 +197,25 @@ class MergeContext(object):
             current = self.current_resources.get(path, FTL.Resource())
             transforms = self.transforms.get(path, [])
 
-            # The result for this path is a complete `FTL.Resource`.
-            result[path] = merge(reference, current, transforms, in_changeset)
+            # Merge legacy translations with existing ones using the reference
+            # as a template.
+            resource = merge(reference, current, transforms, in_changeset)
 
-        return result
-
-    def merge_changesets(self, changesets):
-        """Return a generator yielding FTL ASTs per changeset.
-
-        For each changeset in `changesets`, yield a dict whose keys are
-        resource paths and values are `FTL.Resource` instances.  The values
-        will also be used to update this context's existing localization
-        resources.
-        """
-        for changeset in changesets:
-            merged = self.merge_changeset(changeset)
-
-            # Store the merged resources on the context so that the next merge
+            # Store the merged resource on the context so that the next merge
             # already takes it into account as the existing localization.
-            for path, resource in merged.iteritems():
-                self.current_resources[path] = resource
+            self.current_resources[path] = resource
 
-            yield merged
+            # The result for this path is a complete `FTL.Resource`.
+            yield path, resource
 
-    def serialize_changesets(self, changesets):
-        """Return a generator yielding serialized FTLs per changeset.
+    def serialize_changeset(self, changeset):
+        """Return a dict of serialized FTLs for the changeset.
 
-        For each changeset in `changesets`, yield a dict whose keys are
-        resource paths and values are serialized FTL resources.
+        Given `changeset`, return a dict whose keys are resource paths and
+        values are serialized FTL resources.
         """
-        for merged in self.merge_changesets(changesets):
-            yield {
-                path: self.ftl_serializer.serialize(resource.toJSON())
-                for path, resource in merged.iteritems()
-            }
+
+        return {
+            path: self.ftl_serializer.serialize(resource.toJSON())
+            for path, resource in self.merge_changeset(changeset)
+        }
