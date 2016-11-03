@@ -9,6 +9,7 @@ import hglib
 from hglib.util import b
 
 from l20n.migrate import MergeContext, convert_blame_to_changesets
+from blame import Blame
 
 
 def main(lang, reference_dir, localization_dir, blame, migrations):
@@ -71,15 +72,15 @@ if __name__ == '__main__':
         help='target language code'
     )
     parser.add_argument(
-        '--source-base', type=str,
-        help='directory base with source FTL files'
+        '--reference-dir', type=str,
+        help='directory with reference FTL files'
     )
     parser.add_argument(
-        '--l10n-base', type=str,
-        help='directory base for localization files'
+        '--localization-dir', type=str,
+        help='directory for localization files'
     )
     parser.add_argument(
-        '--blame', type=argparse.FileType(),
+        '--blame', type=argparse.FileType(), default=None,
         help='path to a JSON with blame information'
     )
 
@@ -91,10 +92,18 @@ if __name__ == '__main__':
         name.rstrip('.py') for name in args.migrations
     ]
 
+    if args.blame:
+        # Load pre-computed blame from a JSON file.
+        blame = json.load(args.blame)
+    else:
+        # Compute blame right now.
+        print('Annotating {}'.format(args.localization_dir))
+        blame = Blame(args.localization_dir).main()
+
     main(
         lang=args.lang,
-        reference_dir=args.source_base,
-        localization_dir=args.l10n_base,
-        blame=json.load(args.blame),
+        reference_dir=args.reference_dir,
+        localization_dir=args.localization_dir,
+        blame=blame,
         migrations=map(importlib.import_module, module_names)
     )
