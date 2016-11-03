@@ -5,6 +5,8 @@ from l20n.migrate import CONCAT, COPY, INTERPOLATE, REPLACE
 
 
 def migrate(ctx):
+    """Migrate about:dialog, part {index}"""
+
     ctx.add_reference('browser/aboutDialog.ftl', realpath='aboutDialog.ftl')
     ctx.add_legacy('browser/chrome/browser/aboutDialog.dtd')
 
