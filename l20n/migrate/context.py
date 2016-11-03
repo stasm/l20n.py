@@ -80,9 +80,9 @@ class MergeContext(object):
 
         return ast
 
-    def add_reference(self, path):
+    def add_reference(self, path, realpath=None):
         """Add an FTL AST to this context's reference resources."""
-        fullpath = os.path.join(self.reference_dir, path)
+        fullpath = os.path.join(self.reference_dir, realpath or path)
         self.reference_resources[path] = self.read_ftl_resource(fullpath)
 
     def add_current(self, path):

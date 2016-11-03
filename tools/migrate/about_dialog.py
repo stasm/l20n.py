@@ -5,14 +5,14 @@ from l20n.migrate import CONCAT, COPY, INTERPOLATE, REPLACE
 
 
 def migrate(ctx):
-    ctx.add_reference('aboutDialog.ftl')
+    ctx.add_reference('browser/aboutDialog.ftl', realpath='aboutDialog.ftl')
     ctx.add_legacy('browser/chrome/browser/aboutDialog.dtd')
 
     MESSAGE = ctx.create_message()
     SOURCE = ctx.create_source()
 
     ctx.add_transforms([
-        MESSAGE('aboutDialog.ftl', 'update-failed')(
+        MESSAGE('browser/aboutDialog.ftl', 'update-failed')(
             value=CONCAT(
                 COPY(
                     SOURCE('browser/chrome/browser/aboutDialog.dtd', 'update.failed.start'),
@@ -27,7 +27,7 @@ def migrate(ctx):
                 ),
             )
         ),
-        MESSAGE('aboutDialog.ftl', 'channel-desc')(
+        MESSAGE('browser/aboutDialog.ftl', 'channel-desc')(
             value=CONCAT(
                 COPY(
                     SOURCE('browser/chrome/browser/aboutDialog.dtd', 'channel.description.start'),
@@ -38,7 +38,7 @@ def migrate(ctx):
                 )
             )
         ),
-        MESSAGE('aboutDialog.ftl', 'community')(
+        MESSAGE('browser/aboutDialog.ftl', 'community')(
             value=CONCAT(
                 REPLACE(
                     SOURCE('browser/chrome/browser/aboutDialog.dtd', 'community.start2'),
