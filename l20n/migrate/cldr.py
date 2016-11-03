@@ -3,8 +3,6 @@
 import pkgutil
 import json
 
-pkgutil.get_data
-
 
 def in_canonical_order(a, b):
     return canonical_order.index(a) - canonical_order.index(b)

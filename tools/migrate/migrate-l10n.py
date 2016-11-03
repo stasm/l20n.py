@@ -89,7 +89,7 @@ if __name__ == '__main__':
     # Be nice to shell autocomplete and allow specifying the full name of each
     # migration module file, including the .py extension.
     module_names = [
-        name.rstrip('.py') for name in args.migrations
+        name.replace('.py', '') for name in args.migrations
     ]
 
     if args.blame:
