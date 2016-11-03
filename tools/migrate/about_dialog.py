@@ -17,33 +17,51 @@ def migrate(ctx):
         MESSAGE('browser/aboutDialog.ftl', 'update-failed')(
             value=CONCAT(
                 COPY(
-                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'update.failed.start'),
+                    SOURCE(
+                        'browser/chrome/browser/aboutDialog.dtd',
+                        'update.failed.start'
+                    )
                 ),
                 COPY('<a>'),
                 COPY(
-                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'update.failed.linkText'),
+                    SOURCE(
+                        'browser/chrome/browser/aboutDialog.dtd',
+                        'update.failed.linkText'
+                    )
                 ),
                 COPY('</a>'),
                 COPY(
-                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'update.failed.end'),
-                ),
+                    SOURCE(
+                        'browser/chrome/browser/aboutDialog.dtd',
+                        'update.failed.end'
+                    )
+                )
             )
         ),
         MESSAGE('browser/aboutDialog.ftl', 'channel-desc')(
             value=CONCAT(
                 COPY(
-                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'channel.description.start'),
+                    SOURCE(
+                        'browser/chrome/browser/aboutDialog.dtd',
+                        'channel.description.start'
+                    )
                 ),
                 INTERPOLATE('channelname'),
                 COPY(
-                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'channel.description.end'),
+                    SOURCE(
+                        'browser/chrome/browser/aboutDialog.dtd',
+                        'channel.description.end'
+                    )
                 )
             )
         ),
         MESSAGE('browser/aboutDialog.ftl', 'community')(
             value=CONCAT(
                 REPLACE(
-                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'community.start2'),
+                    SOURCE(
+                        'browser/chrome/browser/aboutDialog.dtd',
+                        'community.start2'
+                    ),
                     {
                         '&brandShortName;': [
                             FTL.ExternalArgument('brand-short-name')
@@ -52,7 +70,10 @@ def migrate(ctx):
                 ),
                 COPY('<a>'),
                 REPLACE(
-                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'community.mozillaLink'),
+                    SOURCE(
+                        'browser/chrome/browser/aboutDialog.dtd',
+                        'community.mozillaLink'
+                    ),
                     {
                         '&vendorShortName;': [
                             FTL.ExternalArgument('vendor-short-name')
@@ -61,15 +82,24 @@ def migrate(ctx):
                 ),
                 COPY('</a>'),
                 COPY(
-                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'community.middle2')
+                    SOURCE(
+                        'browser/chrome/browser/aboutDialog.dtd',
+                        'community.middle2'
+                    )
                 ),
                 COPY('<a>'),
                 COPY(
-                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'community.creditsLink')
+                    SOURCE(
+                        'browser/chrome/browser/aboutDialog.dtd',
+                        'community.creditsLink'
+                    )
                 ),
                 COPY('</a>'),
                 COPY(
-                    SOURCE('browser/chrome/browser/aboutDialog.dtd', 'community.end3')
+                    SOURCE(
+                        'browser/chrome/browser/aboutDialog.dtd',
+                        'community.end3'
+                    )
                 )
             )
         ),
