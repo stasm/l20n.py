@@ -37,6 +37,15 @@ class Resource(Node):
         self.body = body or []
         self.comment = comment
 
+    def entities(self):
+        for entry in self.body:
+            if isinstance(entry, Entity):
+                yield entry
+            if isinstance(entry, Section):
+                # Python 3.3 has `yield from` for this (PEP 380).
+                for entity in entry.entities():
+                    yield entity
+
 
 class Entry(Node):
     def __init__(self):
@@ -49,7 +58,7 @@ class Identifier(Node):
         self.name = name
 
 
-class Section(Node):
+class Section(Resource):
     def __init__(self, key, body=None, comment=None):
         super(Section, self).__init__()
         self.key = key
