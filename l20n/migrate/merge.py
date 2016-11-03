@@ -3,9 +3,9 @@
 import l20n.format.ast as FTL
 
 
-def get_entity(body, ident):
-    """Get entity called `ident` from `body`."""
-    for entity in body:
+def get_entity(entities, ident):
+    """Get entity called `ident` from the `entities` iterable."""
+    for entity in entities:
         if entity.id.name == ident:
             return entity
 
@@ -27,22 +27,25 @@ def merge(reference, localization, transforms, in_changeset):
         ]
 
     def merge_entry(entry):
+        # All standalone comments will be merged.
         if isinstance(entry, FTL.Comment):
             return entry
 
         if isinstance(entry, FTL.Section):
+            section_body = merge_body(entry.body)
+            # Merge the section if at least one of its entities was merged.
             return FTL.Section(
                 key=entry.key,
-                body=merge_body(entry.body),
+                body=section_body,
                 comment=entry.comment
-            )
+            ) if section_body else None
 
         ident = entry.id.name
 
         # If the message is present in the existing localization, we add it to
         # the resulting resource.  This ensures consecutive merges don't remove
         # translations but rather create supersets of them.
-        existing = get_entity(localization.body, ident)
+        existing = get_entity(localization.entities(), ident)
         if existing is not None:
             return existing
 
