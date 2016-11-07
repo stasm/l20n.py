@@ -18,8 +18,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
         )
 
         self.ctx.add_reference('aboutDownloads.ftl')
-        self.ctx.add_legacy('aboutDownloads.dtd')
-        self.ctx.add_legacy('aboutDownloads.properties')
+        self.ctx.add_localization('aboutDownloads.dtd')
+        self.ctx.add_localization('aboutDownloads.properties')
 
         MESSAGE = self.ctx.create_message()
         SOURCE = self.ctx.create_source()
@@ -295,7 +295,7 @@ class TestMergeAboutDialog(unittest.TestCase):
         )
 
         self.ctx.add_reference('aboutDialog.ftl')
-        self.ctx.add_legacy('aboutDialog.dtd')
+        self.ctx.add_localization('aboutDialog.dtd')
 
         MESSAGE = self.ctx.create_message()
         SOURCE = self.ctx.create_source()

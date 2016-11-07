@@ -49,8 +49,7 @@ class MergeContext(object):
 
         # Parsed input resources stored by resource path.
         self.reference_resources = {}
-        self.current_resources = {}
-        self.legacy_resources = {}
+        self.localization_resources = {}
 
         # An iterable of `FTL.Entity` object whose some nodes can be the
         # transform operations: COPY, REPLACE, PLURALS, CONCAT, INTERPOLATE.
@@ -85,19 +84,23 @@ class MergeContext(object):
         fullpath = os.path.join(self.reference_dir, realpath or path)
         self.reference_resources[path] = self.read_ftl_resource(fullpath)
 
-    def add_current(self, path):
-        """Add an FTL AST to this context's current localization resources."""
-        fullpath = os.path.join(self.localization_dir, path)
-        self.current_resources[path] = self.read_ftl_resource(fullpath)
+    def add_localization(self, path):
+        """Add an existing localization resource.
 
-    def add_legacy(self, path):
-        """Add a dict to this context's legacy localization resources."""
+        If it's an FTL resource, add an FTL AST.  Otherwise, it's a legacy
+        resource.  Use a compare-locales parser to create a dict of (key,
+        string value) tuples.
+        """
         fullpath = os.path.join(self.localization_dir, path)
-        parser = getParser(fullpath)
-        parser.readFile(fullpath)
-        # Transform the parsed result which is an iterator into a dict.
-        collection = {ent.get_key(): ent for ent in parser}
-        self.legacy_resources[path] = collection
+        if fullpath.endswith('.ftl'):
+            ast = self.read_ftl_resource(fullpath)
+            self.localization_resources[path] = ast
+        else:
+            parser = getParser(fullpath)
+            parser.readFile(fullpath)
+            # Transform the parsed result which is an iterator into a dict.
+            collection = {ent.get_key(): ent for ent in parser}
+            self.localization_resources[path] = collection
 
     def add_transforms(self, transforms):
         """Define transforms for resource paths.
@@ -150,7 +153,7 @@ class MergeContext(object):
             current_dependencies = self.dependencies[self.current_message]
             current_dependencies.add((path, key))
 
-            entity = self.legacy_resources[path].get(key, None)
+            entity = self.localization_resources[path].get(key, None)
             if entity is not None:
                 return entity.get_val()
         return source
@@ -178,8 +181,9 @@ class MergeContext(object):
             # Merge all known legacy translations.
             changeset = {
                 (path, key)
-                for path, strings in self.legacy_resources.iteritems()
+                for path, strings in self.localization_resources.iteritems()
                 for key in strings.iterkeys()
+                if not path.endswith('.ftl')
             }
 
         for path, reference in self.reference_resources.iteritems():
@@ -194,7 +198,7 @@ class MergeContext(object):
                 # Take the intersection of dependencies and the changeset.
                 return message_deps & changeset
 
-            current = self.current_resources.get(path, FTL.Resource())
+            current = self.localization_resources.get(path, FTL.Resource())
             transforms = self.transforms.get(path, [])
 
             # Merge legacy translations with the existing ones using the
@@ -210,7 +214,7 @@ class MergeContext(object):
 
             # Store the merged snapshot on the context so that the next merge
             # already takes it into account as the existing localization.
-            self.current_resources[path] = snapshot
+            self.localization_resources[path] = snapshot
 
             # The result for this path is a complete `FTL.Resource`.
             yield path, snapshot

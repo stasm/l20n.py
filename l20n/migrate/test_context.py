@@ -16,8 +16,8 @@ class TestMergeContext(unittest.TestCase):
         )
 
         self.ctx.add_reference('aboutDownloads.ftl')
-        self.ctx.add_legacy('aboutDownloads.dtd')
-        self.ctx.add_legacy('aboutDownloads.properties')
+        self.ctx.add_localization('aboutDownloads.dtd')
+        self.ctx.add_localization('aboutDownloads.properties')
 
     def test_merge_single_message(self):
         MESSAGE = self.ctx.create_message()
