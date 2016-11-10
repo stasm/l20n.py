@@ -4,17 +4,17 @@ import unittest
 
 import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser, DTDParser
+
 from util import parse, ftl_message_to_json
-
-from operations import COPY
-
-
-# Mock SOURCE using the collection parsed in setUp.
-def SOURCE(collection, key):
-    return collection.get(key, None).get_val()
+from transforms import evaluate, COPY, SOURCE
 
 
-class TestCopy(unittest.TestCase):
+class MockContext(unittest.TestCase):
+    def get_source(self, path, key):
+        return self.strings.get(key, None).get_val()
+
+
+class TestCopy(MockContext):
     def setUp(self):
         self.strings = parse(PropertiesParser, '''
             foo = Foo
@@ -34,7 +34,7 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 foo = Foo
             ''')
@@ -49,7 +49,7 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 foo-unicode-middle = Foo Bar
             ''')
@@ -64,7 +64,7 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 foo-unicode-begin = " Foo"
             ''')
@@ -79,7 +79,7 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 foo-unicode-end = "Foo "
             ''')
@@ -94,14 +94,14 @@ class TestCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 foo-html-entity = &lt;&#x21E7;&#x2318;K&gt;
             ''')
         )
 
 
-class TestCopyTraits(unittest.TestCase):
+class TestCopyTraits(MockContext):
     def setUp(self):
         self.strings = parse(DTDParser, '''
             <!ENTITY checkForUpdatesButton.label       "Check for updates">
@@ -128,7 +128,7 @@ class TestCopyTraits(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 check-for-updates =
                   [xul/label] Check for updates

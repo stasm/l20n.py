@@ -62,7 +62,7 @@ class ParseContext():
             try:
                 entry = self.getEntry(comment)
 
-                if entry.type == 'Section':
+                if isinstance(entry, ast.Section):
                     resource.body.append(entry)
                     section = entry.body
                 else:
@@ -304,7 +304,7 @@ class ParseContext():
         pattern = ast.Pattern(
             source if self.with_source else None, content
         )
-        pattern._quoteDelim = quoteDelimited is not None
+        pattern.quoted = quoteDelimited is not None
         return pattern
 
     def getPlaceable(self):

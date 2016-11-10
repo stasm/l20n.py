@@ -7,16 +7,16 @@ from l20n.format.parser import FTLParser
 from compare_locales.parser import PropertiesParser, DTDParser
 from util import parse, ftl, ftl_resource_to_json
 
-from merge import merge
-from operations import COPY
+from merge import merge_resource
+from transforms import COPY, SOURCE
 
 
-# Mock SOURCE using the collection parsed in setUp.
-def SOURCE(collection, key):
-    return collection.get(key, None).get_val()
+class MockContext(unittest.TestCase):
+    def get_source(self, path, key):
+        return self.ab_cd_legacy.get(key, None).get_val()
 
 
-class TestMergeMessages(unittest.TestCase):
+class TestMergeMessages(MockContext):
     def setUp(self):
         self.en_us_ftl = parse(FTLParser, ftl('''
             title  = Downloads
@@ -53,7 +53,7 @@ class TestMergeMessages(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('title'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'aboutDownloads.title')
+                    SOURCE(None, 'aboutDownloads.title')
                 )
             ),
             FTL.Entity(
@@ -62,7 +62,7 @@ class TestMergeMessages(unittest.TestCase):
                     FTL.Member(
                         FTL.Keyword('label', 'html'),
                         COPY(
-                            SOURCE(self.ab_cd_legacy, 'aboutDownloads.open')
+                            SOURCE(None, 'aboutDownloads.open')
                         )
                     ),
                 ]
@@ -70,13 +70,13 @@ class TestMergeMessages(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('download-state-downloading'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'downloadState.downloading')
+                    SOURCE(None, 'downloadState.downloading')
                 )
             )
         ]
 
-        resource = merge(
-            self.en_us_ftl, FTL.Resource(), transforms,
+        resource = merge_resource(
+            self, self.en_us_ftl, FTL.Resource(), transforms,
             in_changeset=lambda x: True
         )
 
@@ -97,7 +97,7 @@ class TestMergeMessages(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('title'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'aboutDownloads.title')
+                    SOURCE(None, 'aboutDownloads.title')
                 )
             ),
             FTL.Entity(
@@ -106,7 +106,7 @@ class TestMergeMessages(unittest.TestCase):
                     FTL.Member(
                         FTL.Keyword('label', 'html'),
                         COPY(
-                            SOURCE(self.ab_cd_legacy, 'aboutDownloads.open')
+                            SOURCE(None, 'aboutDownloads.open')
                         )
                     ),
                 ]
@@ -114,13 +114,13 @@ class TestMergeMessages(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('download-state-downloading'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'downloadState.downloading')
+                    SOURCE(None, 'downloadState.downloading')
                 )
             )
         ]
 
-        resource = merge(
-            self.en_us_ftl, self.ab_cd_ftl, transforms,
+        resource = merge_resource(
+            self, self.en_us_ftl, self.ab_cd_ftl, transforms,
             in_changeset=lambda x: True
         )
 
@@ -138,7 +138,7 @@ class TestMergeMessages(unittest.TestCase):
         )
 
 
-class TestMergeAllEntries(unittest.TestCase):
+class TestMergeAllEntries(MockContext):
     def setUp(self):
         self.en_us_ftl = parse(FTLParser, ftl('''
             # This Source Code Form is subject to the terms of …
@@ -185,7 +185,7 @@ class TestMergeAllEntries(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('title'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'aboutDownloads.title')
+                    SOURCE(None, 'aboutDownloads.title')
                 )
             ),
             FTL.Entity(
@@ -194,7 +194,7 @@ class TestMergeAllEntries(unittest.TestCase):
                     FTL.Member(
                         FTL.Keyword('label', 'html'),
                         COPY(
-                            SOURCE(self.ab_cd_legacy, 'aboutDownloads.open')
+                            SOURCE(None, 'aboutDownloads.open')
                         )
                     ),
                 ]
@@ -202,13 +202,13 @@ class TestMergeAllEntries(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('download-state-downloading'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'downloadState.downloading')
+                    SOURCE(None, 'downloadState.downloading')
                 )
             )
         ]
 
-        resource = merge(
-            self.en_us_ftl, FTL.Resource(), transforms,
+        resource = merge_resource(
+            self, self.en_us_ftl, FTL.Resource(), transforms,
             in_changeset=lambda x: True
         )
 
@@ -237,7 +237,7 @@ class TestMergeAllEntries(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('title'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'aboutDownloads.title')
+                    SOURCE(None, 'aboutDownloads.title')
                 )
             ),
             FTL.Entity(
@@ -246,7 +246,7 @@ class TestMergeAllEntries(unittest.TestCase):
                     FTL.Member(
                         FTL.Keyword('label', 'html'),
                         COPY(
-                            SOURCE(self.ab_cd_legacy, 'aboutDownloads.open')
+                            SOURCE(None, 'aboutDownloads.open')
                         )
                     ),
                 ]
@@ -254,13 +254,13 @@ class TestMergeAllEntries(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('download-state-downloading'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'downloadState.downloading')
+                    SOURCE(None, 'downloadState.downloading')
                 )
             )
         ]
 
-        resource = merge(
-            self.en_us_ftl, self.ab_cd_ftl, transforms,
+        resource = merge_resource(
+            self, self.en_us_ftl, self.ab_cd_ftl, transforms,
             in_changeset=lambda x: True
         )
 
@@ -287,7 +287,7 @@ class TestMergeAllEntries(unittest.TestCase):
         )
 
 
-class TestMergeSubset(unittest.TestCase):
+class TestMergeSubset(MockContext):
     def setUp(self):
         self.en_us_ftl = parse(FTLParser, ftl('''
             # This Source Code Form is subject to the terms of …
@@ -328,15 +328,15 @@ class TestMergeSubset(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('title'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'aboutDownloads.title')
+                    SOURCE(None, 'aboutDownloads.title')
                 )
             )
         ]
 
         subset = ('title',)
 
-        resource = merge(
-            self.en_us_ftl, FTL.Resource(), transforms,
+        resource = merge_resource(
+            self, self.en_us_ftl, FTL.Resource(), transforms,
             in_changeset=lambda x: x in subset
         )
 
@@ -356,21 +356,21 @@ class TestMergeSubset(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('title'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'aboutDownloads.title')
+                    SOURCE(None, 'aboutDownloads.title')
                 )
             ),
             FTL.Entity(
                 FTL.Identifier('download-state-downloading'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'downloadState.downloading')
+                    SOURCE(None, 'downloadState.downloading')
                 )
             )
         ]
 
         subset = ('title', 'download-state-downloading')
 
-        resource = merge(
-            self.en_us_ftl, FTL.Resource(), transforms,
+        resource = merge_resource(
+            self, self.en_us_ftl, FTL.Resource(), transforms,
             in_changeset=lambda x: x in subset
         )
 
@@ -395,7 +395,7 @@ class TestMergeSubset(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('title'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'aboutDownloads.title')
+                    SOURCE(None, 'aboutDownloads.title')
                 )
             )
         ]
@@ -408,8 +408,8 @@ class TestMergeSubset(unittest.TestCase):
 
         subset = ('title',)
 
-        resource = merge(
-            self.en_us_ftl, ab_cd_ftl, transforms,
+        resource = merge_resource(
+            self, self.en_us_ftl, ab_cd_ftl, transforms,
             in_changeset=lambda x: x in subset
         )
 
@@ -430,13 +430,13 @@ class TestMergeSubset(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('title'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'aboutDownloads.title')
+                    SOURCE(None, 'aboutDownloads.title')
                 )
             ),
             FTL.Entity(
                 FTL.Identifier('download-state-downloading'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'downloadState.downloading')
+                    SOURCE(None, 'downloadState.downloading')
                 )
             )
         ]
@@ -449,8 +449,8 @@ class TestMergeSubset(unittest.TestCase):
 
         subset = ('title', 'download-state-downloading')
 
-        resource = merge(
-            self.en_us_ftl, ab_cd_ftl, transforms,
+        resource = merge_resource(
+            self, self.en_us_ftl, ab_cd_ftl, transforms,
             in_changeset=lambda x: x in subset
         )
 
@@ -476,7 +476,7 @@ class TestMergeSubset(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('title'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'aboutDownloads.title')
+                    SOURCE(None, 'aboutDownloads.title')
                 )
             )
         ]
@@ -496,8 +496,8 @@ class TestMergeSubset(unittest.TestCase):
 
         subset = ('title',)
 
-        resource = merge(
-            self.en_us_ftl, ab_cd_ftl, transforms,
+        resource = merge_resource(
+            self, self.en_us_ftl, ab_cd_ftl, transforms,
             in_changeset=lambda x: x in subset
         )
 
@@ -525,13 +525,13 @@ class TestMergeSubset(unittest.TestCase):
             FTL.Entity(
                 FTL.Identifier('title'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'aboutDownloads.title')
+                    SOURCE(None, 'aboutDownloads.title')
                 )
             ),
             FTL.Entity(
                 FTL.Identifier('download-state-downloading'),
                 value=COPY(
-                    SOURCE(self.ab_cd_legacy, 'downloadState.downloading')
+                    SOURCE(None, 'downloadState.downloading')
                 )
             )
         ]
@@ -551,8 +551,8 @@ class TestMergeSubset(unittest.TestCase):
 
         subset = ('title', 'download-state-downloading')
 
-        resource = merge(
-            self.en_us_ftl, ab_cd_ftl, transforms,
+        resource = merge_resource(
+            self, self.en_us_ftl, ab_cd_ftl, transforms,
             in_changeset=lambda x: x in subset
         )
 

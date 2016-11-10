@@ -2,9 +2,11 @@
 
 import unittest
 
+import l20n.format.ast as FTL
+
 from util import ftl, ftl_resource_to_json, to_json
 from context import MergeContext
-from operations import COPY
+from transforms import SOURCE, COPY
 
 
 class TestMergeContext(unittest.TestCase):
@@ -20,11 +22,9 @@ class TestMergeContext(unittest.TestCase):
         self.ctx.add_localization('aboutDownloads.properties')
 
     def test_merge_single_message(self):
-        MESSAGE = self.ctx.create_message()
-        SOURCE = self.ctx.create_source()
-
-        self.ctx.add_transforms([
-            MESSAGE('aboutDownloads.ftl', 'title')(
+        self.ctx.add_transforms('aboutDownloads.ftl', [
+            FTL.Entity(
+                id=FTL.Identifier('title'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.dtd',
@@ -50,11 +50,9 @@ class TestMergeContext(unittest.TestCase):
         )
 
     def test_merge_one_changeset(self):
-        MESSAGE = self.ctx.create_message()
-        SOURCE = self.ctx.create_source()
-
-        self.ctx.add_transforms([
-            MESSAGE('aboutDownloads.ftl', 'title')(
+        self.ctx.add_transforms('aboutDownloads.ftl', [
+            FTL.Entity(
+                id=FTL.Identifier('title'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.dtd',
@@ -62,7 +60,8 @@ class TestMergeContext(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDownloads.ftl', 'header')(
+            FTL.Entity(
+                id=FTL.Identifier('header'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.dtd',
@@ -94,11 +93,9 @@ class TestMergeContext(unittest.TestCase):
         )
 
     def test_merge_two_changesets(self):
-        MESSAGE = self.ctx.create_message()
-        SOURCE = self.ctx.create_source()
-
-        self.ctx.add_transforms([
-            MESSAGE('aboutDownloads.ftl', 'title')(
+        self.ctx.add_transforms('aboutDownloads.ftl', [
+            FTL.Entity(
+                id=FTL.Identifier('title'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.dtd',
@@ -106,7 +103,8 @@ class TestMergeContext(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDownloads.ftl', 'header')(
+            FTL.Entity(
+                id=FTL.Identifier('header'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.dtd',
@@ -152,11 +150,9 @@ class TestMergeContext(unittest.TestCase):
         self.assertDictEqual(merged_b, expected_b)
 
     def test_serialize_changeset(self):
-        MESSAGE = self.ctx.create_message()
-        SOURCE = self.ctx.create_source()
-
-        self.ctx.add_transforms([
-            MESSAGE('aboutDownloads.ftl', 'title')(
+        self.ctx.add_transforms('aboutDownloads.ftl', [
+            FTL.Entity(
+                id=FTL.Identifier('title'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.dtd',
@@ -164,7 +160,8 @@ class TestMergeContext(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDownloads.ftl', 'header')(
+            FTL.Entity(
+                id=FTL.Identifier('header'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.dtd',

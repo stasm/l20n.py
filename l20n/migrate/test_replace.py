@@ -4,17 +4,17 @@ import unittest
 
 import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser
+
 from util import parse, ftl_message_to_json
-
-from operations import REPLACE
-
-
-# Mock SOURCE using the collection parsed in setUp.
-def SOURCE(collection, key):
-    return collection.get(key, None).get_val()
+from transforms import evaluate, REPLACE, SOURCE
 
 
-class TestReplace(unittest.TestCase):
+class MockContext(unittest.TestCase):
+    def get_source(self, path, key):
+        return self.strings.get(key, None).get_val()
+
+
+class TestReplace(MockContext):
     def setUp(self):
         self.strings = parse(PropertiesParser, '''
             hello = Hello, #1!
@@ -33,7 +33,7 @@ class TestReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 hello = Hello, { $username }!
             ''')
@@ -50,7 +50,7 @@ class TestReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 welcome = Welcome, { $username }, to { $appname }!
             ''')
@@ -68,7 +68,7 @@ class TestReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 welcome = Welcome, { $username }, to { $appname }!
             ''')
@@ -84,7 +84,7 @@ class TestReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 welcome = Welcome, { $username }, to #2!
             ''')
@@ -100,7 +100,7 @@ class TestReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 first = { $foo } Bar
             ''')
@@ -116,7 +116,7 @@ class TestReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 last = Foo { $bar }
             ''')

@@ -4,17 +4,17 @@ import unittest
 
 import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser, DTDParser
+
 from util import parse, ftl_message_to_json
-
-from operations import COPY, INTERPOLATE, REPLACE, CONCAT
-
-
-# Mock SOURCE using the collection parsed in setUp.
-def SOURCE(collection, key):
-    return collection.get(key, None).get_val()
+from transforms import evaluate, CONCAT, COPY, INTERPOLATE, REPLACE, SOURCE
 
 
-class TestConcatCopy(unittest.TestCase):
+class MockContext(unittest.TestCase):
+    def get_source(self, path, key):
+        return self.strings.get(key, None).get_val()
+
+
+class TestConcatCopy(MockContext):
     def setUp(self):
         self.strings = parse(PropertiesParser, '''
             hello = Hello, world!
@@ -37,7 +37,7 @@ class TestConcatCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 hello = Hello, world!
             ''')
@@ -56,24 +56,26 @@ class TestConcatCopy(unittest.TestCase):
             )
         )
 
+        result = evaluate(self, msg)
+
         self.assertEqual(
-            len(msg.value.elements),
+            len(result.value.elements),
             1,
             'The constructed value should have only one element'
         )
         self.assertIsInstance(
-            msg.value.elements[0],
+            result.value.elements[0],
             FTL.TextElement,
             'The constructed element should be a TextElement.'
         )
         self.assertEqual(
-            msg.value.elements[0].value,
+            result.value.elements[0].value,
             'Hello, world!',
             'The TextElement should be a concatenation of the sources.'
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            result.toJSON(),
             ftl_message_to_json('''
                 hello = Hello, world!
             ''')
@@ -93,7 +95,7 @@ class TestConcatCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 hello = " Hello, world!"
             ''')
@@ -113,14 +115,14 @@ class TestConcatCopy(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 hello = "Hello, world! "
             ''')
         )
 
 
-class TestConcatLiteral(unittest.TestCase):
+class TestConcatLiteral(MockContext):
     def setUp(self):
         self.strings = parse(DTDParser, '''
             <!ENTITY update.failed.start        "Update failed. ">
@@ -147,14 +149,14 @@ class TestConcatLiteral(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 update-failed = Update failed. <a>Download manually</a>!
             ''')
         )
 
 
-class TestConcatInterpolate(unittest.TestCase):
+class TestConcatInterpolate(MockContext):
     def setUp(self):
         self.strings = parse(DTDParser, '''
             <!ENTITY channel.description.start  "You are on the ">
@@ -176,14 +178,14 @@ class TestConcatInterpolate(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 channel-desc = "You are on the { $channelname } channel. "
             ''')
         )
 
 
-class TestConcatReplace(unittest.TestCase):
+class TestConcatReplace(MockContext):
     def setUp(self):
         self.strings = parse(DTDParser, '''
             <!ENTITY community.start       "&brandShortName; is designed by ">
@@ -230,7 +232,7 @@ class TestConcatReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json(
                 'community = { $brand-short-name } is designed by '
                 '<a>{ $vendor-short-name }</a>, a <a>global community</a> '

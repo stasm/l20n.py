@@ -1,25 +1,49 @@
 import json
 
 
-def attr2json(attr):
-    if isinstance(attr, Node):
-        return attr.toJSON()
-    elif isinstance(attr, list):
-        return [attr2json(i) for i in attr]
-    else:
-        return attr
-
-
 class Node(object):
-    def __init__(self):
-        self.type = self.__class__.__name__
+    def map(self, fun):
+        """Apply `fun` to all descendants of `node` and return a new node.
+
+        Traverse `node` depth-first applying `fun` to subnodes and leaves.
+        Children are processed before parents.
+        """
+
+        def map_value(value):
+            """Call `fun` on `value` and its descendants."""
+            if isinstance(value, Node):
+                return value.map(fun)
+            if isinstance(value, list):
+                return fun(map(map_value, value))
+            else:
+                return fun(value)
+
+        node = self.__class__(
+            **{
+                name: map_value(value)
+                for name, value in vars(self).items()
+            }
+        )
+
+        return fun(node)
 
     def toJSON(self):
-        fields = {}
-        for key in vars(self):
-            attr = getattr(self, key)
-            fields[key] = attr2json(attr)
-        return fields
+        def to_json(value):
+            if isinstance(value, Node):
+                return value.toJSON()
+            if isinstance(value, list):
+                return map(to_json, value)
+            else:
+                return value
+
+        obj = {
+            name: to_json(value)
+            for name, value in vars(self).items()
+        }
+        obj.update(
+            {'type': self.__class__.__name__}
+        )
+        return obj
 
     def __str__(self):
         return json.dumps(self.toJSON())
@@ -67,11 +91,11 @@ class Section(Resource):
 
 
 class Pattern(Node):
-    def __init__(self, source, elements, quoteDelim=False):
+    def __init__(self, source, elements, quoted=False):
         super(Pattern, self).__init__()
         self.source = source
         self.elements = elements
-        self._quoteDelim = quoteDelim
+        self.quoted = quoted
 
 
 class Member(Node):

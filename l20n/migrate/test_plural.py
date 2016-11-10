@@ -4,22 +4,20 @@ import unittest
 
 import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser
+
 from util import parse, ftl_message_to_json
-
-from operations import COPY, REPLACE, VARIANTS
-
-
-# Mock SOURCE using the collection parsed in setUp.
-def SOURCE(collection, key):
-    return collection.get(key, None).get_val()
+from transforms import evaluate, COPY, PLURALS, REPLACE, SOURCE
 
 
-# Create a PLURALS transform for en-US.
-def PLURALS(source, selector, foreach):
-    return VARIANTS(source, selector, ('one', 'other'), foreach)
+class MockContext(unittest.TestCase):
+    # Static categories corresponding to en-US.
+    plural_categories = ('one', 'other')
+
+    def get_source(self, path, key):
+        return self.strings.get(key, None).get_val()
 
 
-class TestPlural(unittest.TestCase):
+class TestPlural(MockContext):
     def setUp(self):
         self.strings = parse(PropertiesParser, '''
             deleteAll=Delete this download?;Delete all downloads?
@@ -36,7 +34,7 @@ class TestPlural(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 delete-all = { $num ->
                     [one] Delete this download?
@@ -46,7 +44,7 @@ class TestPlural(unittest.TestCase):
         )
 
 
-class TestPluralReplace(unittest.TestCase):
+class TestPluralReplace(MockContext):
     def setUp(self):
         self.strings = parse(PropertiesParser, '''
             deleteAll=Delete this download?;Delete #1 downloads?
@@ -66,7 +64,7 @@ class TestPluralReplace(unittest.TestCase):
         )
 
         self.assertEqual(
-            msg.toJSON(),
+            evaluate(self, msg).toJSON(),
             ftl_message_to_json('''
                 delete-all = { $num ->
                     [one] Delete this download?

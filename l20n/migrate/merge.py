@@ -2,15 +2,11 @@
 
 import l20n.format.ast as FTL
 
-
-def get_entity(entities, ident):
-    """Get entity called `ident` from the `entities` iterable."""
-    for entity in entities:
-        if entity.id.name == ident:
-            return entity
+from transforms import evaluate
+from util import get_entity
 
 
-def merge(reference, localization, transforms, in_changeset):
+def merge_resource(ctx, reference, current, transforms, in_changeset):
     """Transform legacy translations into FTL.
 
     Use the `reference` FTL AST as a template.  For each en-US string in the
@@ -45,7 +41,7 @@ def merge(reference, localization, transforms, in_changeset):
         # If the message is present in the existing localization, we add it to
         # the resulting resource.  This ensures consecutive merges don't remove
         # translations but rather create supersets of them.
-        existing = get_entity(localization.entities(), ident)
+        existing = get_entity(current.entities(), ident)
         if existing is not None:
             return existing
 
@@ -58,7 +54,7 @@ def merge(reference, localization, transforms, in_changeset):
         if transform is not None:
             if transform.comment is None:
                 transform.comment = entry.comment
-            return transform
+            return evaluate(ctx, transform)
 
     body = merge_body(reference.body)
     return FTL.Resource(body, reference.comment)

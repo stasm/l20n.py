@@ -6,7 +6,7 @@ import l20n.format.ast as FTL
 
 from util import ftl_resource_to_json, to_json
 from context import MergeContext
-from operations import COPY, REPLACE, CONCAT, INTERPOLATE
+from transforms import CONCAT, COPY, INTERPOLATE, PLURALS, REPLACE, SOURCE
 
 
 class TestMergeAboutDownloads(unittest.TestCase):
@@ -21,12 +21,9 @@ class TestMergeAboutDownloads(unittest.TestCase):
         self.ctx.add_localization('aboutDownloads.dtd')
         self.ctx.add_localization('aboutDownloads.properties')
 
-        MESSAGE = self.ctx.create_message()
-        SOURCE = self.ctx.create_source()
-        PLURALS = self.ctx.create_plurals()
-
-        self.ctx.add_transforms([
-            MESSAGE('aboutDownloads.ftl', 'title')(
+        self.ctx.add_transforms('aboutDownloads.ftl', [
+            FTL.Entity(
+                id=FTL.Identifier('title'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.dtd',
@@ -34,7 +31,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDownloads.ftl', 'header')(
+            FTL.Entity(
+                id=FTL.Identifier('header'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.dtd',
@@ -42,7 +40,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDownloads.ftl', 'empty')(
+            FTL.Entity(
+                id=FTL.Identifier('empty'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.dtd',
@@ -50,7 +49,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDownloads.ftl', 'open-menuitem')(
+            FTL.Entity(
+                id=FTL.Identifier('open-menuitem'),
                 traits=[
                     FTL.Member(
                         FTL.Keyword('label', 'html'),
@@ -63,7 +63,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 ]
             ),
-            MESSAGE('aboutDownloads.ftl', 'retry-menuitem')(
+            FTL.Entity(
+                id=FTL.Identifier('retry-menuitem'),
                 traits=[
                     FTL.Member(
                         FTL.Keyword('label', 'html'),
@@ -76,7 +77,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 ]
             ),
-            MESSAGE('aboutDownloads.ftl', 'remove-menuitem')(
+            FTL.Entity(
+                id=FTL.Identifier('remove-menuitem'),
                 traits=[
                     FTL.Member(
                         FTL.Keyword('label', 'html'),
@@ -89,7 +91,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 ]
             ),
-            MESSAGE('aboutDownloads.ftl', 'pause-menuitem')(
+            FTL.Entity(
+                id=FTL.Identifier('pause-menuitem'),
                 traits=[
                     FTL.Member(
                         FTL.Keyword('label', 'html'),
@@ -102,7 +105,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 ]
             ),
-            MESSAGE('aboutDownloads.ftl', 'resume-menuitem')(
+            FTL.Entity(
+                id=FTL.Identifier('resume-menuitem'),
                 traits=[
                     FTL.Member(
                         FTL.Keyword('label', 'html'),
@@ -115,7 +119,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 ]
             ),
-            MESSAGE('aboutDownloads.ftl', 'cancel-menuitem')(
+            FTL.Entity(
+                id=FTL.Identifier('cancel-menuitem'),
                 traits=[
                     FTL.Member(
                         FTL.Keyword('label', 'html'),
@@ -128,7 +133,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 ]
             ),
-            MESSAGE('aboutDownloads.ftl', 'remove-all-menuitem')(
+            FTL.Entity(
+                id=FTL.Identifier('remove-all-menuitem'),
                 traits=[
                     FTL.Member(
                         FTL.Keyword('label', 'html'),
@@ -141,7 +147,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 ]
             ),
-            MESSAGE('aboutDownloads.ftl', 'delete-all-title')(
+            FTL.Entity(
+                id=FTL.Identifier('delete-all-title'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.properties',
@@ -149,7 +156,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDownloads.ftl', 'delete-all-message')(
+            FTL.Entity(
+                id=FTL.Identifier('delete-all-message'),
                 value=PLURALS(
                     SOURCE(
                         'aboutDownloads.properties',
@@ -162,7 +170,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDownloads.ftl', 'download-state-downloading')(
+            FTL.Entity(
+                id=FTL.Identifier('download-state-downloading'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.properties',
@@ -170,7 +179,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDownloads.ftl', 'download-state-canceled')(
+            FTL.Entity(
+                id=FTL.Identifier('download-state-canceled'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.properties',
@@ -178,7 +188,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDownloads.ftl', 'download-state-failed')(
+            FTL.Entity(
+                id=FTL.Identifier('download-state-failed'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.properties',
@@ -186,7 +197,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDownloads.ftl', 'download-state-paused')(
+            FTL.Entity(
+                id=FTL.Identifier('download-state-paused'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.properties',
@@ -194,7 +206,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDownloads.ftl', 'download-state-starting')(
+            FTL.Entity(
+                id=FTL.Identifier('download-state-starting'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.properties',
@@ -202,7 +215,8 @@ class TestMergeAboutDownloads(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDownloads.ftl', 'download-size-unknown')(
+            FTL.Entity(
+                id=FTL.Identifier('download-size-unknown'),
                 value=COPY(
                     SOURCE(
                         'aboutDownloads.properties',
@@ -297,11 +311,9 @@ class TestMergeAboutDialog(unittest.TestCase):
         self.ctx.add_reference('aboutDialog.ftl')
         self.ctx.add_localization('aboutDialog.dtd')
 
-        MESSAGE = self.ctx.create_message()
-        SOURCE = self.ctx.create_source()
-
-        self.ctx.add_transforms([
-            MESSAGE('aboutDialog.ftl', 'update-failed')(
+        self.ctx.add_transforms('aboutDialog.ftl', [
+            FTL.Entity(
+                id=FTL.Identifier('update-failed'),
                 value=CONCAT(
                     COPY(
                         SOURCE('aboutDialog.dtd', 'update.failed.start'),
@@ -316,7 +328,8 @@ class TestMergeAboutDialog(unittest.TestCase):
                     ),
                 )
             ),
-            MESSAGE('aboutDialog.ftl', 'channel-desc')(
+            FTL.Entity(
+                id=FTL.Identifier('channel-desc'),
                 value=CONCAT(
                     COPY(
                         SOURCE('aboutDialog.dtd', 'channel.description.start'),
@@ -327,7 +340,8 @@ class TestMergeAboutDialog(unittest.TestCase):
                     )
                 )
             ),
-            MESSAGE('aboutDialog.ftl', 'community')(
+            FTL.Entity(
+                id=FTL.Identifier('community'),
                 value=CONCAT(
                     REPLACE(
                         SOURCE('aboutDialog.dtd', 'community.start'),
@@ -394,8 +408,6 @@ class TestMergeAboutDialog(unittest.TestCase):
         update-failed = Aktualizacja się nie powiodła. <a>Pobierz</a>.
             ''')
         }
-
-        self.maxDiff = None
 
         self.assertDictEqual(
             to_json(self.ctx.merge_changeset(changeset)),

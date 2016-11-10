@@ -79,7 +79,7 @@ class FTLSerializer():
             elif elem['type'] == 'Placeable':
                 str += self.dumpPlaceable(elem)
 
-        if pattern['_quoteDelim']:
+        if pattern['quoted']:
             return u'"{}"'.format(str)
         return str
 
