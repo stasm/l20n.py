@@ -1,20 +1,18 @@
 # coding=utf8
 
 import l20n.format.ast as FTL
-from l20n.migrate import CONCAT, COPY, INTERPOLATE, REPLACE
+from l20n.migrate import CONCAT, COPY, EXTERNAL, REPLACE, SOURCE
 
 
 def migrate(ctx):
     """Migrate about:dialog, part {index}"""
 
     ctx.add_reference('browser/aboutDialog.ftl', realpath='aboutDialog.ftl')
-    ctx.add_legacy('browser/chrome/browser/aboutDialog.dtd')
+    ctx.add_localization('browser/chrome/browser/aboutDialog.dtd')
 
-    MESSAGE = ctx.create_message()
-    SOURCE = ctx.create_source()
-
-    ctx.add_transforms([
-        MESSAGE('browser/aboutDialog.ftl', 'update-failed')(
+    ctx.add_transforms('browser/aboutDialog.ftl', [
+        FTL.Entity(
+            id=FTL.Identifier('update-failed'),
             value=CONCAT(
                 COPY(
                     SOURCE(
@@ -38,7 +36,8 @@ def migrate(ctx):
                 )
             )
         ),
-        MESSAGE('browser/aboutDialog.ftl', 'channel-desc')(
+        FTL.Entity(
+            id=FTL.Identifier('channel-desc'),
             value=CONCAT(
                 COPY(
                     SOURCE(
@@ -46,7 +45,7 @@ def migrate(ctx):
                         'channel.description.start'
                     )
                 ),
-                INTERPOLATE('channelname'),
+                EXTERNAL('channelname'),
                 COPY(
                     SOURCE(
                         'browser/chrome/browser/aboutDialog.dtd',
@@ -55,7 +54,8 @@ def migrate(ctx):
                 )
             )
         ),
-        MESSAGE('browser/aboutDialog.ftl', 'community')(
+        FTL.Entity(
+            id=FTL.Identifier('community'),
             value=CONCAT(
                 REPLACE(
                     SOURCE(
