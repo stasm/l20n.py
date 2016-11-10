@@ -33,7 +33,7 @@ class MergeContext(object):
           into FTL and merged into the existing FTL files for this language.
 
         - A list of `FTL.Entity` objects whose some nodes are special operation
-          nodes: CONCAT, COPY, INTERPOLATE, PLURALS, REPLACE, SOURCE.
+          nodes: CONCAT, COPY, EXTERNAL, PLURALS, REPLACE, SOURCE.
     """
 
     def __init__(self, lang, reference_dir, localization_dir):
@@ -53,7 +53,7 @@ class MergeContext(object):
         self.localization_resources = {}
 
         # An iterable of `FTL.Entity` objects whose some nodes can be the
-        # transform operations: COPY, REPLACE, PLURALS, CONCAT, INTERPOLATE.
+        # transform operations.
         self.transforms = {}
 
         # A dict whose keys are `(path, key)` tuples corresponding to target

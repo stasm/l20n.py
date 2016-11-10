@@ -6,7 +6,7 @@ import l20n.format.ast as FTL
 
 from util import ftl_resource_to_json, to_json
 from context import MergeContext
-from transforms import CONCAT, COPY, INTERPOLATE, PLURALS, REPLACE, SOURCE
+from transforms import CONCAT, COPY, EXTERNAL, PLURALS, REPLACE, SOURCE
 
 
 class TestMergeAboutDownloads(unittest.TestCase):
@@ -334,7 +334,7 @@ class TestMergeAboutDialog(unittest.TestCase):
                     COPY(
                         SOURCE('aboutDialog.dtd', 'channel.description.start'),
                     ),
-                    INTERPOLATE('channelname'),
+                    EXTERNAL('channelname'),
                     COPY(
                         SOURCE('aboutDialog.dtd', 'channel.description.end'),
                     )

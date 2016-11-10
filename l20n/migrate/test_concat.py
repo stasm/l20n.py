@@ -6,7 +6,7 @@ import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser, DTDParser
 
 from util import parse, ftl_message_to_json
-from transforms import evaluate, CONCAT, COPY, INTERPOLATE, REPLACE, SOURCE
+from transforms import evaluate, CONCAT, COPY, EXTERNAL, REPLACE, SOURCE
 
 
 class MockContext(unittest.TestCase):
@@ -170,7 +170,7 @@ class TestConcatInterpolate(MockContext):
                 COPY(
                     SOURCE(self.strings, 'channel.description.start'),
                 ),
-                INTERPOLATE('channelname'),
+                EXTERNAL('channelname'),
                 COPY(
                     SOURCE(self.strings, 'channel.description.end'),
                 )

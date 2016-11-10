@@ -64,7 +64,7 @@ class COPY(Transform):
         )
 
 
-class INTERPOLATE(Transform):
+class EXTERNAL(Transform):
     """Create an FTL placeable with the external argument `name`
 
     This is a common use-case when joining translations with CONCAT.
