@@ -35,9 +35,9 @@ class COPY(Transform):
     variants.  All \uXXXX will be converted to the literal characters they
     encode.
 
-    HTML entities are left unchanged for now.  They're use might or might not
-    be intentional.  Consider the following example in which `&amp;` could be
-    replaced with the literal `&`:
+    HTML entities are left unchanged for now because we can't know if they
+    should be converted to the characters they represent or not.  Consider the
+    following example in which `&amp;` could be replaced with the literal `&`:
 
         Privacy &amp; History
 
@@ -148,7 +148,7 @@ class PLURALS(Transform):
 
     Build an `FTL.SelectExpression` with the supplied `selector` and variants
     extracted from the `source`.  Each variant will be run through the
-    `foreach` function.  It should return an `FTL.Pattern`.
+    `foreach` function, which should return an `FTL.Node`.
     """
 
     def __init__(self, source, selector, foreach):
@@ -196,13 +196,12 @@ class CONCAT(Transform):
 
         # Merge adjecent `FTL.TextElement` nodes.
         def merge_adjecent_text(acc, cur):
-            if len(acc) == 0 or type(cur) != FTL.TextElement:
-                acc.append(cur)
-                return acc
-
-            last = acc[-1]
-            if type(last) == FTL.TextElement:
-                last.value += cur.value
+            if type(cur) == FTL.TextElement and len(acc):
+                last = acc[-1]
+                if type(last) == FTL.TextElement:
+                    last.value += cur.value
+                else:
+                    acc.append(cur)
             else:
                 acc.append(cur)
             return acc

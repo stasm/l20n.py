@@ -45,8 +45,8 @@ def merge_resource(ctx, reference, current, transforms, in_changeset):
         if existing is not None:
             return existing
 
-        # If the message doesn't exist if the localization yet, make sure it's
-        # supposed to be added as part of this merger.
+        # Make sure this message is supposed to be migrated as part of the
+        # current changeset.
         if not in_changeset(ident):
             return None
 

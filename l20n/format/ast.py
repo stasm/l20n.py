@@ -1,6 +1,15 @@
 import json
 
 
+def to_json(value):
+    if isinstance(value, Node):
+        return value.toJSON()
+    if isinstance(value, list):
+        return map(to_json, value)
+    else:
+        return value
+
+
 class Node(object):
     def map(self, fun):
         """Apply `fun` to all descendants of `node` and return a new node.
@@ -28,14 +37,6 @@ class Node(object):
         return fun(node)
 
     def toJSON(self):
-        def to_json(value):
-            if isinstance(value, Node):
-                return value.toJSON()
-            if isinstance(value, list):
-                return map(to_json, value)
-            else:
-                return value
-
         obj = {
             name: to_json(value)
             for name, value in vars(self).items()

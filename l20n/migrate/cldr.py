@@ -17,11 +17,16 @@ canonical_order = ('zero', 'one', 'two', 'few', 'many', 'other')
 
 categories = {}
 for lang, rules in rules.items():
-    categories[lang] = sorted(map(
+    categories[lang] = tuple(sorted(map(
         lambda key: key.replace('pluralRule-count-', ''),
         rules.keys()
-    ), in_canonical_order)
+    ), in_canonical_order))
 
 
 def get_plural_categories(lang):
-    return categories.get(lang, None)
+    langs_categories = categories.get(lang, None)
+
+    if langs_categories is None:
+        raise RuntimeError('Unknown language: {}'.format(lang))
+
+    return langs_categories

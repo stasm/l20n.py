@@ -67,7 +67,7 @@ class MergeContext(object):
             contents = f.read()
         except UnicodeDecodeError, err:
             logger = logging.getLogger('migrate')
-            logger.error(u'Error reading file {}: {}'.format(path, str(err)))
+            logger.error(u'Error reading file {}: {}'.format(path, err))
         f.close()
 
         ast, errors = self.ftl_parser.parse(contents)
@@ -75,7 +75,7 @@ class MergeContext(object):
         if len(errors):
             logger = logging.getLogger('migrate')
             for err in errors:
-                logger.error(u'Syntax error in {}: {}'.format(path, str(err)))
+                logger.error(u'Syntax error in {}: {}'.format(path, err))
 
         return ast
 
@@ -99,7 +99,7 @@ class MergeContext(object):
             parser = getParser(fullpath)
             parser.readFile(fullpath)
             # Transform the parsed result which is an iterator into a dict.
-            collection = {ent.get_key(): ent for ent in parser}
+            collection = {ent.key: ent for ent in parser}
             self.localization_resources[path] = collection
 
     def add_transforms(self, path, transforms):
@@ -126,7 +126,7 @@ class MergeContext(object):
             self.dependencies[(path, node.id.name)] = dependencies
 
         path_transforms = self.transforms.setdefault(path, [])
-        path_transforms.extend(transforms)
+        path_transforms += transforms
 
     def get_source(self, path, key):
         """Get an entity from the localized source.
@@ -140,7 +140,7 @@ class MergeContext(object):
             resource = self.localization_resources[path]
             entity = resource.get(key, None)
             if entity is not None:
-                return entity.get_val()
+                return entity.val
 
     def merge_changeset(self, changeset=None):
         """Return a generator of FTL ASTs for the changeset.
@@ -160,7 +160,6 @@ class MergeContext(object):
                 (path, key)
                 for path, strings in self.localization_resources.iteritems()
                 for key in strings.iterkeys()
-                if not path.endswith('.ftl')
             }
 
         for path, reference in self.reference_resources.iteritems():

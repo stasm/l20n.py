@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # coding=utf8
 
 import os
@@ -86,12 +87,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # Be nice to shell autocomplete and allow specifying the full name of each
-    # migration module file, including the .py extension.
-    module_names = [
-        name.replace('.py', '') for name in args.migrations
-    ]
-
     if args.blame:
         # Load pre-computed blame from a JSON file.
         blame = json.load(args.blame)
@@ -105,5 +100,5 @@ if __name__ == '__main__':
         reference_dir=args.reference_dir,
         localization_dir=args.localization_dir,
         blame=blame,
-        migrations=map(importlib.import_module, module_names)
+        migrations=map(importlib.import_module, args.migrations)
     )

@@ -21,7 +21,7 @@ def parse(Parser, string):
     parser = Parser()
     parser.readContents(string)
     # Transform the parsed result which is an iterator into a dict.
-    return {ent.get_key(): ent for ent in parser}
+    return {ent.key: ent for ent in parser}
 
 
 def ftl(code):
