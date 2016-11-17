@@ -13,7 +13,7 @@ from l20n.migrate import MergeContext, convert_blame_to_changesets
 from blame import Blame
 
 
-def main(lang, reference_dir, localization_dir, blame, migrations):
+def main(lang, reference_dir, localization_dir, blame, migrations, dry_run):
     """Run migrations and commit files with the result."""
     changesets = convert_blame_to_changesets(blame)
     client = hglib.open(localization_dir)
@@ -43,10 +43,11 @@ def main(lang, reference_dir, localization_dir, blame, migrations):
             # Write serialized FTL files to disk.
             for path, content in snapshot.iteritems():
                 fullpath = os.path.join(localization_dir, path)
-                with open(fullpath, 'w') as f:
-                    print('  Writing to {}'.format(fullpath))
-                    f.write(content.encode('utf8'))
-                    f.close()
+                print('  Writing to {}'.format(fullpath))
+                if not dry_run:
+                    with open(fullpath, 'w') as f:
+                        f.write(content.encode('utf8'))
+                        f.close()
 
             index += 1
             message = migration.migrate.__doc__.format(
@@ -56,9 +57,10 @@ def main(lang, reference_dir, localization_dir, blame, migrations):
             )
 
             print('    Committing changeset: {}'.format(message))
-            client.commit(
-                b(message), user=b(changeset['author']), addremove=True
-            )
+            if not dry_run:
+                client.commit(
+                    b(message), user=b(changeset['author']), addremove=True
+                )
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -84,6 +86,11 @@ if __name__ == '__main__':
         '--blame', type=argparse.FileType(), default=None,
         help='path to a JSON with blame information'
     )
+    parser.add_argument(
+        '--dry-run', action='store_true',
+        help='do not write to disk nor commit any changes'
+    )
+    parser.set_defaults(dry_run=False)
 
     args = parser.parse_args()
 
@@ -100,5 +107,6 @@ if __name__ == '__main__':
         reference_dir=args.reference_dir,
         localization_dir=args.localization_dir,
         blame=blame,
-        migrations=map(importlib.import_module, args.migrations)
+        migrations=map(importlib.import_module, args.migrations),
+        dry_run=args.dry_run
     )
