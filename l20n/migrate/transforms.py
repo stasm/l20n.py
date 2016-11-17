@@ -158,11 +158,11 @@ class PLURALS(Transform):
 
     def __call__(self, ctx):
         variants = self.source.split(';')
-        keys_enum = enumerate(ctx.plural_categories)
-        last_variant_index = len(variants) - 1
+        keys = ctx.plural_categories
+        last_index = min(len(variants), len(keys)) - 1
 
-        def createMember(variant):
-            index, key = next(keys_enum)
+        def createMember(zipped_enum):
+            index, (key, variant) = zipped_enum
             # Run the legacy variant through `foreach` which returns an
             # `FTL.Node` describing the transformation required for each
             # variant.  Then evaluate it to a migrated FTL node.
@@ -170,12 +170,12 @@ class PLURALS(Transform):
             return FTL.Member(
                 FTL.Keyword(key),
                 value,
-                default=index == last_variant_index
+                default=index == last_index
             )
 
         select = FTL.SelectExpression(
             self.selector,
-            variants=map(createMember, variants)
+            variants=map(createMember, enumerate(zip(keys, variants)))
         )
         elements = [FTL.Placeable([select])]
 

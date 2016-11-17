@@ -23,8 +23,7 @@ class TestPlural(MockContext):
             deleteAll=Delete this download?;Delete all downloads?
         ''')
 
-    def test_plural(self):
-        msg = FTL.Entity(
+        self.message = FTL.Entity(
             FTL.Identifier('delete-all'),
             value=PLURALS(
                 SOURCE(self.strings, 'deleteAll'),
@@ -33,12 +32,36 @@ class TestPlural(MockContext):
             )
         )
 
+    def test_plural(self):
         self.assertEqual(
-            evaluate(self, msg).toJSON(),
+            evaluate(self, self.message).toJSON(),
             ftl_message_to_json('''
                 delete-all = { $num ->
                     [one] Delete this download?
                    *[other] Delete all downloads?
+                }
+            ''')
+        )
+
+    def test_plural_too_few_variants(self):
+        self.plural_categories = ('one', 'few', 'many', 'other')
+        self.assertEqual(
+            evaluate(self, self.message).toJSON(),
+            ftl_message_to_json('''
+                delete-all = { $num ->
+                    [one] Delete this download?
+                   *[few] Delete all downloads?
+                }
+            ''')
+        )
+
+    def test_plural_too_many_variants(self):
+        self.plural_categories = ('one',)
+        self.assertEqual(
+            evaluate(self, self.message).toJSON(),
+            ftl_message_to_json('''
+                delete-all = { $num ->
+                   *[one] Delete this download?
                 }
             ''')
         )
