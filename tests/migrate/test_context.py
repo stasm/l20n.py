@@ -1,20 +1,26 @@
 # coding=utf8
 
+import os
 import unittest
 
 import l20n.format.ast as FTL
 
-from util import ftl, ftl_resource_to_json, to_json
-from context import MergeContext
-from transforms import SOURCE, COPY
+from l20n.migrate.util import ftl, ftl_resource_to_json, to_json
+from l20n.migrate.context import MergeContext
+from l20n.migrate.transforms import SOURCE, COPY
+
+
+def here(*parts):
+    dirname = os.path.dirname(os.path.realpath(__file__))
+    return os.path.join(dirname, *parts)
 
 
 class TestMergeContext(unittest.TestCase):
     def setUp(self):
         self.ctx = MergeContext(
             lang='pl',
-            reference_dir='fixtures/en-US',
-            localization_dir='fixtures/pl'
+            reference_dir=here('fixtures/en-US'),
+            localization_dir=here('fixtures/pl')
         )
 
         self.ctx.add_reference('aboutDownloads.ftl')

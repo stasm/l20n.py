@@ -5,8 +5,8 @@ import unittest
 import l20n.format.ast as FTL
 from compare_locales.parser import PropertiesParser
 
-from util import parse, ftl_message_to_json
-from transforms import evaluate, REPLACE, SOURCE
+from l20n.migrate.util import parse, ftl_message_to_json
+from l20n.migrate.transforms import evaluate, REPLACE, SOURCE
 
 
 class MockContext(unittest.TestCase):

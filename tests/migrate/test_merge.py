@@ -5,10 +5,10 @@ import unittest
 import l20n.format.ast as FTL
 from l20n.format.parser import FTLParser
 from compare_locales.parser import PropertiesParser, DTDParser
-from util import parse, ftl, ftl_resource_to_json
 
-from merge import merge_resource
-from transforms import COPY, SOURCE
+from l20n.migrate.util import parse, ftl, ftl_resource_to_json
+from l20n.migrate.merge import merge_resource
+from l20n.migrate.transforms import COPY, SOURCE
 
 
 class MockContext(unittest.TestCase):

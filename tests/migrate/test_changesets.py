@@ -2,7 +2,7 @@
 
 import unittest
 
-from changesets import convert_blame_to_changesets
+from l20n.migrate.changesets import convert_blame_to_changesets
 
 
 class TestBlameToChangesets(unittest.TestCase):

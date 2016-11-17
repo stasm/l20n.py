@@ -4,8 +4,8 @@ import unittest
 
 import l20n.format.ast as FTL
 
-from transforms import CONCAT, COPY, SOURCE
-from util import ftl_resource_to_ast, fold_ftl
+from l20n.migrate.transforms import CONCAT, COPY, SOURCE
+from l20n.migrate.util import ftl_resource_to_ast, fold_ftl
 
 
 def get_source(acc, cur):

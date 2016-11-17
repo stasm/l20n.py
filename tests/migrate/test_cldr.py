@@ -2,7 +2,7 @@
 
 import unittest
 
-from cldr import get_plural_categories
+from l20n.migrate.cldr import get_plural_categories
 
 
 class TestPluralCategories(unittest.TestCase):
