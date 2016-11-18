@@ -45,13 +45,11 @@ def merge_resource(ctx, reference, current, transforms, in_changeset):
         if existing is not None:
             return existing
 
+        transform = get_entity(transforms, ident)
+
         # Make sure this message is supposed to be migrated as part of the
         # current changeset.
-        if not in_changeset(ident):
-            return None
-
-        transform = get_entity(transforms, ident)
-        if transform is not None:
+        if transform is not None and in_changeset(ident):
             if transform.comment is None:
                 transform.comment = entry.comment
             return evaluate(ctx, transform)

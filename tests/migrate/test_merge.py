@@ -22,6 +22,7 @@ class TestMergeMessages(MockContext):
             title  = Downloads
             header = Your Downloads
             empty  = No Downloads
+            about  = About Downloads
 
             open-menuitem =
                 [html/label] Open
@@ -31,6 +32,7 @@ class TestMergeMessages(MockContext):
 
         self.ab_cd_ftl = parse(FTLParser, ftl('''
             empty = Brak pobranych plików
+            about = Previously Hardcoded Value
         '''))
 
         ab_cd_dtd = parse(DTDParser, '''
@@ -54,6 +56,10 @@ class TestMergeMessages(MockContext):
                 value=COPY(
                     SOURCE(None, 'aboutDownloads.title')
                 )
+            ),
+            FTL.Entity(
+                FTL.Identifier('about'),
+                value=COPY('Hardcoded Value')
             ),
             FTL.Entity(
                 FTL.Identifier('open-menuitem'),
@@ -84,6 +90,7 @@ class TestMergeMessages(MockContext):
             resource.toJSON(),
             ftl_resource_to_json('''
                 title = Pobrane pliki
+                about = Hardcoded Value
 
                 open-menuitem =
                     [html/label] Otwórz
@@ -103,6 +110,7 @@ class TestMergeMessages(MockContext):
             ftl_resource_to_json('''
                 title = Pobrane pliki
                 empty = Brak pobranych plików
+                about = Previously Hardcoded Value
 
                 open-menuitem =
                     [html/label] Otwórz

@@ -5,6 +5,7 @@
 title  = Downloads
 header = Your Downloads
 empty  = No Downloads
+about  = About Downloads
 
 open-menuitem =
     [html/label] Open

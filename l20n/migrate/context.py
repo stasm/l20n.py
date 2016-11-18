@@ -149,7 +149,7 @@ class MergeContext(object):
             # Scan `node` for `SOURCE` nodes and collect the information they
             # store into a set of dependencies.
             dependencies = fold_ftl(get_sources, node, set())
-            # Set this source as a dependency for the current transform.
+            # Set these sources as dependencies for the current transform.
             self.dependencies[(path, node.id.name)] = dependencies
 
         path_transforms = self.transforms.setdefault(path, [])
@@ -199,8 +199,21 @@ class MergeContext(object):
                 If at least one dependency of the entity is in the current
                 set of changeset, merge it.
                 """
-                message_deps = self.dependencies.get((path, ident), set())
-                # Take the intersection of dependencies and the changeset.
+                message_deps = self.dependencies.get((path, ident), None)
+
+                # Don't merge if we don't have a transform for this message.
+                if message_deps is None:
+                    return False
+
+                # As a special case, if a transform exists but has no
+                # dependecies, it's a hardcoded `FTL.Node` which doesn't
+                # migrate any existing translation but rather creates a new
+                # one.  Merge it.
+                if len(message_deps) == 0:
+                    return True
+
+                # If the intersection of the dependencies and the current
+                # changeset is non-empty, merge this message.
                 return message_deps & changeset
 
             # Merge legacy translations with the existing ones using the

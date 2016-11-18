@@ -28,6 +28,29 @@ class TestMergeContext(unittest.TestCase):
         self.ctx.add_localization('aboutDownloads.dtd')
         self.ctx.add_localization('aboutDownloads.properties')
 
+    def test_hardcoded_node(self):
+        self.ctx.add_transforms('aboutDownloads.ftl', [
+            FTL.Entity(
+                id=FTL.Identifier('about'),
+                value=COPY('Hardcoded Value')
+            ),
+        ])
+
+        expected = {
+            'aboutDownloads.ftl': ftl_resource_to_json('''
+        # This Source Code Form is subject to the terms of the Mozilla Public
+        # License, v. 2.0. If a copy of the MPL was not distributed with this
+        # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+        about = Hardcoded Value
+            ''')
+        }
+
+        self.assertDictEqual(
+            to_json(self.ctx.merge_changeset()),
+            expected
+        )
+
     def test_merge_single_message(self):
         self.ctx.add_transforms('aboutDownloads.ftl', [
             FTL.Entity(
