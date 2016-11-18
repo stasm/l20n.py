@@ -33,7 +33,7 @@ class MergeContext(object):
           language.  The translations from these files will be transformed
           into FTL and merged into the existing FTL files for this language.
 
-        - A list of `FTL.Entity` objects whose some nodes are special operation
+        - A list of `FTL.Entity` objects some of whose nodes are special operation
           nodes: CONCAT, COPY, EXTERNAL, PLURALS, REPLACE, SOURCE.
     """
 
@@ -53,7 +53,7 @@ class MergeContext(object):
         self.reference_resources = {}
         self.localization_resources = {}
 
-        # An iterable of `FTL.Entity` objects whose some nodes can be the
+        # An iterable of `FTL.Entity` objects some of whose nodes can be the
         # transform operations.
         self.transforms = {}
 
