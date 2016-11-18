@@ -11,25 +11,27 @@ def to_json(value):
 
 
 class Node(object):
-    def map(self, fun):
-        """Apply `fun` to all descendants of `node` and return a new node.
+    def traverse(self, fun):
+        """Postorder-traverse this node and apply `fun` to all child nodes.
 
-        Traverse `node` depth-first applying `fun` to subnodes and leaves.
-        Children are processed before parents.
+        Traverse this node depth-first applying `fun` to subnodes and leaves.
+        Children are processed before parents (postorder traversal).
+
+        Return a new instance of the node.
         """
 
-        def map_value(value):
+        def visit(value):
             """Call `fun` on `value` and its descendants."""
             if isinstance(value, Node):
-                return value.map(fun)
+                return value.traverse(fun)
             if isinstance(value, list):
-                return fun(map(map_value, value))
+                return fun(map(visit, value))
             else:
                 return fun(value)
 
         node = self.__class__(
             **{
-                name: map_value(value)
+                name: visit(value)
                 for name, value in vars(self).items()
             }
         )

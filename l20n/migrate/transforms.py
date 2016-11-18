@@ -10,7 +10,7 @@ def evaluate(ctx, node):
         else:
             return subnode
 
-    return node.map(eval_node)
+    return node.traverse(eval_node)
 
 
 class Transform(FTL.Node):
@@ -214,18 +214,18 @@ class CONCAT(Transform):
 
         return FTL.Pattern(None, elements, quoted)
 
-    def map(self, fun):
-        def map_value(value):
+    def traverse(self, fun):
+        def visit(value):
             if isinstance(value, FTL.Node):
-                return value.map(fun)
+                return value.traverse(fun)
             if isinstance(value, list):
-                return fun(map(map_value, value))
+                return fun(map(visit, value))
             else:
                 return fun(value)
 
         node = self.__class__(
             *[
-                map_value(value) for value in self.patterns
+                visit(value) for value in self.patterns
             ]
         )
 

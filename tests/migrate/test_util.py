@@ -14,7 +14,7 @@ def get_source(acc, cur):
     return acc
 
 
-class TestMap(unittest.TestCase):
+class TestTraverse(unittest.TestCase):
     def test_simple_values(self):
         ast = ftl_resource_to_ast('''
             foo = Foo
@@ -22,7 +22,7 @@ class TestMap(unittest.TestCase):
         ''')
 
         self.assertEqual(
-            ast.map(lambda x: x).toJSON(),
+            ast.traverse(lambda x: x).toJSON(),
             ast.toJSON()
         )
 
@@ -36,7 +36,7 @@ class TestMap(unittest.TestCase):
         ''')
 
         self.assertEqual(
-            ast.map(lambda x: x).toJSON(),
+            ast.traverse(lambda x: x).toJSON(),
             ast.toJSON()
         )
 
@@ -53,7 +53,7 @@ class TestMap(unittest.TestCase):
             )
         )
 
-        result = node.map(lambda x: x)
+        result = node.traverse(lambda x: x)
 
         self.assertEqual(
             result.value.patterns[0].source.key,
