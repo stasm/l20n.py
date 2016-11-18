@@ -84,7 +84,7 @@ class MergeContext(object):
         parser = getParser(path)
         parser.readFile(path)
         # Transform the parsed result which is an iterator into a dict.
-        return {ent.key: ent for ent in parser}
+        return {entity.key: entity.val for entity in parser}
 
     def add_reference(self, path, realpath=None):
         """Add an FTL AST to this context's reference resources."""
@@ -157,7 +157,7 @@ class MergeContext(object):
         path_transforms += transforms
 
     def get_source(self, path, key):
-        """Get an entity from the localized source.
+        """Get an entity value from the localized source.
 
         Used by the `SOURCE` transform.
         """
@@ -166,9 +166,7 @@ class MergeContext(object):
             return get_entity(resource.entities(), key)
         else:
             resource = self.localization_resources[path]
-            entity = resource.get(key, None)
-            if entity is not None:
-                return entity.val
+            return resource.get(key, None)
 
     def merge_changeset(self, changeset=None):
         """Return a generator of FTL ASTs for the changeset.
