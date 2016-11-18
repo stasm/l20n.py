@@ -3,9 +3,8 @@
 import unittest
 
 import l20n.format.ast as FTL
-
+from l20n.util import fold
 from l20n.migrate.transforms import CONCAT, COPY, SOURCE
-from l20n.migrate.util import ftl_resource_to_ast, fold_ftl
 
 
 def get_source(acc, cur):
@@ -15,31 +14,6 @@ def get_source(acc, cur):
 
 
 class TestTraverse(unittest.TestCase):
-    def test_simple_values(self):
-        ast = ftl_resource_to_ast('''
-            foo = Foo
-            bar = Bar
-        ''')
-
-        self.assertEqual(
-            ast.traverse(lambda x: x).toJSON(),
-            ast.toJSON()
-        )
-
-    def test_complex_values(self):
-        ast = ftl_resource_to_ast('''
-            foo = Foo { bar }
-                [bar]  AAA { $num ->
-                           [one] One
-                          *[other] Many { NUMBER($num) }
-                       } BBB
-        ''')
-
-        self.assertEqual(
-            ast.traverse(lambda x: x).toJSON(),
-            ast.toJSON()
-        )
-
     def test_copy_concat(self):
         node = FTL.Entity(
             FTL.Identifier('hello'),
@@ -66,27 +40,6 @@ class TestTraverse(unittest.TestCase):
 
 
 class TestReduce(unittest.TestCase):
-    def test_pattern(self):
-        node = FTL.Entity(
-            id=FTL.Identifier('key'),
-            value=FTL.Pattern(
-                source=None,
-                elements=[
-                    FTL.TextElement('Value')
-                ]
-            )
-        )
-
-        def get_value(acc, cur):
-            if isinstance(cur, FTL.TextElement):
-                return acc + (cur.value,)
-            return acc
-
-        self.assertEqual(
-            fold_ftl(get_value, node, ()),
-            ('Value',)
-        )
-
     def test_copy_value(self):
         node = FTL.Entity(
             id=FTL.Identifier('key'),
@@ -96,7 +49,7 @@ class TestReduce(unittest.TestCase):
         )
 
         self.assertEqual(
-            fold_ftl(get_source, node, ()),
+            fold(get_source, node, ()),
             (('path', 'key'),)
         )
 
@@ -120,7 +73,7 @@ class TestReduce(unittest.TestCase):
         )
 
         self.assertEqual(
-            fold_ftl(get_source, node, ()),
+            fold(get_source, node, ()),
             (('path1', 'key1'), ('path2', 'key2'))
         )
 
@@ -138,6 +91,6 @@ class TestReduce(unittest.TestCase):
         )
 
         self.assertEqual(
-            fold_ftl(get_source, node, ()),
+            fold(get_source, node, ()),
             (('path1', 'key1'), ('path2', 'key2'))
         )

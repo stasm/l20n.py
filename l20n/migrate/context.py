@@ -7,12 +7,13 @@ import logging
 import l20n.format.ast as FTL
 from l20n.format.parser import FTLParser
 from l20n.format.serializer import FTLSerializer
+from l20n.util import fold
 from compare_locales.parser import getParser
 
 from cldr import get_plural_categories
 from transforms import SOURCE
 from merge import merge_resource
-from util import get_entity, fold_ftl
+from util import get_entity
 
 
 class MergeContext(object):
@@ -148,7 +149,7 @@ class MergeContext(object):
         for node in transforms:
             # Scan `node` for `SOURCE` nodes and collect the information they
             # store into a set of dependencies.
-            dependencies = fold_ftl(get_sources, node, set())
+            dependencies = fold(get_sources, node, set())
             # Set these sources as dependencies for the current transform.
             self.dependencies[(path, node.id.name)] = dependencies
 
