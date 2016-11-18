@@ -62,27 +62,44 @@ class MergeContext(object):
         self.dependencies = {}
 
     def read_ftl_resource(self, path):
-        f = codecs.open(path, 'r', 'utf8')
+        """Read an FTL resource and parse it into an AST."""
         try:
+            f = codecs.open(path, 'r', 'utf8')
             contents = f.read()
-        except UnicodeDecodeError, err:
-            logger = logging.getLogger('migrate')
-            logger.error(u'Error reading file {}: {}'.format(path, err))
-        f.close()
+        finally:
+            f.close()
 
         ast, errors = self.ftl_parser.parse(contents)
 
         if len(errors):
             logger = logging.getLogger('migrate')
             for err in errors:
-                logger.error(u'Syntax error in {}: {}'.format(path, err))
+                logger.warn(u'Syntax error in {}: {}'.format(path, err))
 
         return ast
+
+    def read_legacy_resource(self, path):
+        """Read a legacy resource and parse it into a dict."""
+        parser = getParser(path)
+        parser.readFile(path)
+        # Transform the parsed result which is an iterator into a dict.
+        return {ent.key: ent for ent in parser}
 
     def add_reference(self, path, realpath=None):
         """Add an FTL AST to this context's reference resources."""
         fullpath = os.path.join(self.reference_dir, realpath or path)
-        self.reference_resources[path] = self.read_ftl_resource(fullpath)
+        try:
+            ast = self.read_ftl_resource(fullpath)
+        except IOError as err:
+            logger = logging.getLogger('migrate')
+            logger.error(u'Missing reference file: {}'.format(path))
+            raise err
+        except UnicodeDecodeError as err:
+            logger = logging.getLogger('migrate')
+            logger.error(u'Error reading file {}: {}'.format(path, err))
+            raise err
+        else:
+            self.reference_resources[path] = ast
 
     def add_localization(self, path):
         """Add an existing localization resource.
@@ -93,14 +110,24 @@ class MergeContext(object):
         """
         fullpath = os.path.join(self.localization_dir, path)
         if fullpath.endswith('.ftl'):
-            ast = self.read_ftl_resource(fullpath)
-            self.localization_resources[path] = ast
+            try:
+                ast = self.read_ftl_resource(fullpath)
+            except IOError:
+                logger = logging.getLogger('migrate')
+                logger.warn(u'Missing localization file: {}'.format(path))
+            except UnicodeDecodeError as err:
+                logger = logging.getLogger('migrate')
+                logger.warn(u'Error reading file {}: {}'.format(path, err))
+            else:
+                self.localization_resources[path] = ast
         else:
-            parser = getParser(fullpath)
-            parser.readFile(fullpath)
-            # Transform the parsed result which is an iterator into a dict.
-            collection = {ent.key: ent for ent in parser}
-            self.localization_resources[path] = collection
+            try:
+                collection = self.read_legacy_resource(fullpath)
+            except IOError:
+                logger = logging.getLogger('migrate')
+                logger.warn(u'Missing localization file: {}'.format(path))
+            else:
+                self.localization_resources[path] = collection
 
     def add_transforms(self, path, transforms):
         """Define transforms for path.
@@ -207,3 +234,6 @@ class MergeContext(object):
             path: self.ftl_serializer.serialize(snapshot.toJSON())
             for path, snapshot in self.merge_changeset(changeset)
         }
+
+
+logging.basicConfig()
