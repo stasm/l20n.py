@@ -50,16 +50,16 @@ def main(lang, reference_dir, localization_dir, blame, migrations, dry_run):
                         f.close()
 
             index += 1
+            author = changeset['author'].encode('utf8')
             message = migration.migrate.__doc__.format(
                 index=index,
-                author=changeset['author'],
-                files='\n'.join(snapshot.keys())
+                author=author
             )
 
             print('    Committing changeset: {}'.format(message))
             if not dry_run:
                 client.commit(
-                    b(message), user=b(changeset['author']), addremove=True
+                    b(message), user=b(author), addremove=True
                 )
 
 if __name__ == '__main__':
