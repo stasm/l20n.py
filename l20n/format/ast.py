@@ -58,9 +58,9 @@ class Node(object):
         }
 
 
-class Resource(Node):
+class NodeList(Node):
     def __init__(self, body=None, comment=None):
-        super(Resource, self).__init__()
+        super(NodeList, self).__init__()
         self.body = body or []
         self.comment = comment
 
@@ -69,9 +69,19 @@ class Resource(Node):
             if isinstance(entry, Entity):
                 yield entry
             if isinstance(entry, Section):
-                # Python 3.3 has `yield from` for this (PEP 380).
                 for entity in entry.entities():
                     yield entity
+
+
+class Resource(NodeList):
+    def __init__(self, body=None, comment=None):
+        super(Resource, self).__init__(body, comment)
+
+
+class Section(NodeList):
+    def __init__(self, key, body=None, comment=None):
+        super(Section, self).__init__(body, comment)
+        self.key = key
 
 
 class Entry(Node):
@@ -83,14 +93,6 @@ class Identifier(Node):
     def __init__(self, name):
         super(Identifier, self).__init__()
         self.name = name
-
-
-class Section(Resource):
-    def __init__(self, key, body=None, comment=None):
-        super(Section, self).__init__()
-        self.key = key
-        self.body = body or []
-        self.comment = comment
 
 
 class Pattern(Node):
