@@ -214,6 +214,26 @@ class TestMergeContext(unittest.TestCase):
             self.assertEqual(serialized, next(expected))
 
 
+class TestIncompleteReference(unittest.TestCase):
+    def setUp(self):
+        # Silence all logging.
+        logging.disable(logging.CRITICAL)
+
+        self.ctx = MergeContext(
+            lang='pl',
+            reference_dir=here('fixtures/en-US'),
+            localization_dir=here('fixtures/pl')
+        )
+
+    def tearDown(self):
+        # Resume logging.
+        logging.disable(logging.NOTSET)
+
+    def test_missing_reference_file(self):
+        with self.assertRaises(IOError):
+            self.ctx.add_reference('missing.ftl')
+
+
 class TestIncompleteLocalization(unittest.TestCase):
     def setUp(self):
         # Silence all logging.

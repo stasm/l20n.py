@@ -63,8 +63,8 @@ class MergeContext(object):
 
     def read_ftl_resource(self, path):
         """Read an FTL resource and parse it into an AST."""
+        f = codecs.open(path, 'r', 'utf8')
         try:
-            f = codecs.open(path, 'r', 'utf8')
             contents = f.read()
         finally:
             f.close()
