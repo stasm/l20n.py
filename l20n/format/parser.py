@@ -301,11 +301,11 @@ class ParseContext():
             else:
                 return None
 
-        pattern = ast.Pattern(
-            source if self.with_source else None, content
+        return ast.Pattern(
+            source=source if self.with_source else None,
+            elements=content,
+            quoted=quoteDelimited is not None
         )
-        pattern.quoted = quoteDelimited is not None
-        return pattern
 
     def getPlaceable(self):
         self._index += 1
